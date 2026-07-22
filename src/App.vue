@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 
 const assetMap = {
   "terron-logo.png": new URL("../assets/terron-logo.png", import.meta.url).href,
+  "signature.png": new URL("../assets/signature.png", import.meta.url).href,
   "konecta-logo.jpeg": new URL("../assets/konecta-logo.jpeg", import.meta.url).href,
   "sngular-logo.webp": new URL("../assets/sngular-logo.webp", import.meta.url).href,
   "tuparty-logo.png": new URL("../assets/tuparty-logo.png", import.meta.url).href,
@@ -479,7 +480,7 @@ onBeforeUnmount(() => {
     <aside class="sidebar" aria-label="Portfolio navigation">
       <div class="sidebar-top">
         <a class="brand" href="#top" aria-label="Gonzalo Rodríguez Terrón portfolio home" @click="handleAnchorClick">
-          <img class="brand-mark" :src="asset('terron-logo.png')" alt="" aria-hidden="true" />
+          <img class="brand-mark" :src="asset('signature.png')" alt="" aria-hidden="true" />
           <span class="brand-text">Gonzalo's Portfolio</span>
         </a>
 
@@ -542,7 +543,7 @@ onBeforeUnmount(() => {
     <header class="mobile-header" :class="{ 'is-open': mobileMenuOpen }">
       <a class="brand compact" href="#top" aria-label="Gonzalo Rodriguez Terron portfolio home" @click="handleAnchorClick">
         <span class="brand-mark">
-          <img :src="asset('terron-logo.png')" alt="" aria-hidden="true" />
+          <img :src="asset('signature.png')" alt="" aria-hidden="true" />
         </span>
         <span class="brand-text">Gonzalo's Portfolio</span>
       </a>
