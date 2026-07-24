@@ -548,12 +548,14 @@ function setupRevealObserver() {
         ".solution-block > *",
         ".board",
         ".about-block > *",
-        ".category-grid",
+        ".studio-lead",
+        ".studio-section .story-copy p",
+        ".section-lead",
         ".category",
         ".transition-note",
         ".pricing-panel",
         ".team-card",
-        ".letter p",
+        ".letter p:not(.letter-label)",
         ".letter-sign",
         ".final-cta > *",
         ".service-card",
@@ -561,20 +563,90 @@ function setupRevealObserver() {
     )
   );
 
-  targets.forEach((target, index) => {
+  const groupCounters = new Map();
+  targets.forEach((target) => {
     target.classList.add("scroll-reveal");
-    target.style.setProperty("--reveal-delay", `${Math.min(index % 8, 7) * 70}ms`);
+    const parent = target.parentElement;
+    const order = groupCounters.get(parent) ?? 0;
+    groupCounters.set(parent, order + 1);
+    target.style.setProperty("--reveal-delay", `${Math.min(order, 6) * 80}ms`);
   });
+
+  // Prose blocks reveal line by line (top→bottom mask wipe) instead of as a
+  // single block. Only text paragraphs — not cards, media or headings.
+  const proseSelector = [
+    ".hero-title",
+    ".hero-eyebrow",
+    ".narrative p",
+    ".problem-lead",
+    ".problem-points li",
+    ".solution-lead",
+    ".transition-note",
+    ".section-lead",
+    ".studio-lead",
+    ".studio-section .story-copy p",
+    ".about-block p",
+    ".letter p",
+  ].join(", ");
+  targets.forEach((target) => {
+    if (target.matches?.(proseSelector)) target.classList.add("line-reveal");
+  });
+
+  // Inline accents (red highlights, hand-font text, bold) animate on their own
+  // rhythm. Each accent is owned by its nearest reveal block and lit when that
+  // block reveals, so timing always matches when the accent scrolls into view.
+  // Split each highlight into per-word spans, group them by rendered line, and
+  // give each word a delay so the fill paints word-by-word in reading order with
+  // a short pause at every line break — a phrase that wraps paints line by line.
+  document
+    .querySelectorAll(".mark, .hl")
+    .forEach((el) => el.classList.add("reveal-accent"));
+  document
+    .querySelectorAll(".narrative b")
+    .forEach((el) => el.classList.add("reveal-accent"));
+  document
+    .querySelectorAll(".narrative i, .letter-label")
+    .forEach((el) => el.classList.add("reveal-accent", "reveal-write"));
+
+  const accents = Array.from(document.querySelectorAll(".reveal-accent"));
+  const accentsByOwner = new Map();
+  accents.forEach((accent) => {
+    const owner = accent.closest(".scroll-reveal");
+    if (!owner) {
+      accent.classList.add("is-lit"); // no reveal block above it → just show
+      return;
+    }
+    if (!accentsByOwner.has(owner)) accentsByOwner.set(owner, []);
+    accentsByOwner.get(owner).push(accent);
+  });
+
+  const reveal = (target) => {
+    const delay = Number.parseFloat(target.style.getPropertyValue("--reveal-delay")) || 0;
+    window.setTimeout(() => {
+      target.classList.add("is-visible");
+      const keycaps =
+        target.matches?.(".keycaps")
+          ? [target]
+          : Array.from(target.querySelectorAll(".keycaps"));
+      keycaps.forEach((kc) => window.setTimeout(() => kc.classList.add("is-writing"), 120));
+      // Multiple accents in the same block light one after another, in
+      // reading order, so each finishes before the next begins.
+      (accentsByOwner.get(target) || []).forEach((accent, index) => {
+        window.setTimeout(() => accent.classList.add("is-lit"), 180 + index * 760);
+      });
+    }, delay);
+  };
 
   const heroTargets = Array.from(document.querySelectorAll(".hero-inner > .scroll-reveal"));
   window.requestAnimationFrame(() => {
     heroTargets.forEach((target, index) => {
-      window.setTimeout(() => target.classList.add("is-visible"), index * 90);
+      window.setTimeout(() => reveal(target), index * 90);
     });
   });
 
   if (reduceMotion || !targets.length) {
     targets.forEach((target) => target.classList.add("is-visible"));
+    accents.forEach((accent) => accent.classList.add("is-lit"));
     return;
   }
 
@@ -585,8 +657,7 @@ function setupRevealObserver() {
   targets.forEach((target) => {
     const bounds = target.getBoundingClientRect();
     if (rootBounds && bounds.top < rootBounds.bottom && bounds.bottom > rootBounds.top) {
-      const delay = Number.parseFloat(target.style.getPropertyValue("--reveal-delay")) || 0;
-      window.setTimeout(() => target.classList.add("is-visible"), delay);
+      reveal(target);
     }
   });
 
@@ -594,8 +665,7 @@ function setupRevealObserver() {
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        const delay = Number.parseFloat(entry.target.style.getPropertyValue("--reveal-delay")) || 0;
-        window.setTimeout(() => entry.target.classList.add("is-visible"), delay);
+        reveal(entry.target);
         revealObserver?.unobserve(entry.target);
       });
     },
