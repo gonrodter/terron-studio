@@ -4257,7 +4257,7 @@ h1 span {
   align-self: flex-start;
 }
 
-.et-align.align-center i:nth-child(2) {
+.et-align.align-center i {
   align-self: center;
 }
 
