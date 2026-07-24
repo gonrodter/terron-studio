@@ -2243,14 +2243,24 @@ h1 span {
     backdrop-filter: blur(16px);
   }
 
+  .brand.compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .brand.compact .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     font-size: 12px;
   }
 
   .brand.compact .brand-text {
-    font-size: 18px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--slate);
   }
 
   .mobile-menu-toggle {
@@ -2271,10 +2281,10 @@ h1 span {
   .mobile-menu-toggle span {
     position: absolute;
     left: 8px;
-    top: 21px;
+    top: 22px;
     display: block;
     width: 30px;
-    height: 4px;
+    height: 2px;
     border-radius: 999px;
     background: currentColor;
     transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease;
@@ -4953,6 +4963,16 @@ h1 span {
     flex-basis: 100%;
   }
 
+  /* decorative editor toolbar: bound to box + wrap so it can't overflow the page */
+  .edit-toolbar {
+    left: 0;
+    right: 0;
+    flex-wrap: wrap;
+    white-space: normal;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
   .narrative p,
   .keycap-line,
   .solution-lead,
@@ -5166,6 +5186,169 @@ h1 span {
 
   .section-heading::before {
     flex: 0 0 0;
+  }
+}
+
+/* desktop/mobile content swaps */
+.mob-only {
+  display: none;
+}
+
+.solution-problem {
+  margin: 0 0 26px;
+  max-width: 46ch;
+  font-size: clamp(17px, 2.1vw, 21px);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.solution-problem-lead {
+  margin: 0 0 14px;
+}
+
+.solution-problem-points {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.solution-problem-points li {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.solution-problem-points li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #933a4a;
+}
+
+.solution-problem-note {
+  margin: 0;
+}
+
+/* ── mobile: lean sales funnel — hero → work → trust line → pricing → CTA ── */
+@media (max-width: 820px) {
+  .narrative,
+  .problem-block,
+  .about-block,
+  .showcase-block,
+  .transition-section {
+    display: none !important;
+  }
+
+  .desk-only {
+    display: none;
+  }
+
+  .mob-only {
+    display: revert;
+  }
+
+  /* center all text on mobile */
+  .main-panel {
+    text-align: center;
+  }
+
+  .solution-problem,
+  .solution-lead,
+  .solution-motto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .solution-problem-points {
+    display: inline-block;
+    text-align: left;
+  }
+
+  /* pricing containers keep their content left-aligned */
+  .pricing-config,
+  .retainer-config,
+  .pricing-features,
+  .pricing-features li,
+  .addon-label,
+  .pricing-note {
+    text-align: left;
+  }
+
+  /* section names: big, bold, uppercase, centered — no side rules */
+  .section-heading {
+    display: block;
+    text-align: center;
+    gap: 0;
+  }
+
+  .section-heading::before,
+  .section-heading::after {
+    display: none;
+  }
+
+  .section-heading h2 {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 7vw, 34px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--slate);
+  }
+
+  /* founder: keep the one trust line, drop the story */
+  .studio-section .section-heading,
+  .studio-section .story-copy {
+    display: none !important;
+  }
+
+  /* closing letter: keep only the punch line + signature + CTAs */
+  .final-cta .letter p:not(.letter-final) {
+    display: none !important;
+  }
+
+  .final-cta .letter {
+    margin-bottom: 8px;
+  }
+}
+
+/* ── mobile hero: centered stack, full-width buttons (match ref) ── */
+@media (max-width: 600px) {
+  .hero {
+    text-align: center !important;
+    padding-top: 24px !important;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 18px;
+  }
+
+  .hero-title {
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: clamp(30px, 8.5vw, 40px);
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 26px;
+  }
+
+  .hero-actions .pill-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-media {
+    margin-top: 34px;
   }
 }
 

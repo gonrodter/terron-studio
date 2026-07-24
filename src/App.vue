@@ -823,6 +823,7 @@ const vTilt = {
         <span class="brand-mark">
           <img :src="asset('terron-logo.png')" alt="Terron Studio" />
         </span>
+        <span class="brand-text">Terron Studio</span>
       </a>
 
       <button
@@ -937,7 +938,16 @@ const vTilt = {
 
         <!-- SOLUTION + board -->
         <section id="work" class="section solution-block section-observe" data-section="work">
-          <div class="section-heading"><h2>What's the solution?</h2></div>
+          <div class="section-heading">
+            <h2><span class="desk-only">What's the solution?</span><span class="mob-only">Why we exist</span></h2>
+          </div>
+          <div class="solution-problem mob-only">
+            <p class="solution-problem-lead">Most brands hit the same wall: <span class="mark">fragmentation.</span></p>
+            <ul class="solution-problem-points">
+              <li v-for="point in problemPoints" :key="point">{{ point }}</li>
+            </ul>
+            <p class="solution-problem-note">A premium experience can't be assembled from pieces — it has to feel like <span class="mark green">one thing.</span></p>
+          </div>
           <p class="solution-lead">
             That's why we built
             <span class="brand-inline">Terron Studio</span>
