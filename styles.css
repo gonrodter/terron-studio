@@ -5280,6 +5280,16 @@ h1 span {
     text-align: left;
   }
 
+  /* keep addon label + price on one line each */
+  .addon-label,
+  .addon-price {
+    white-space: nowrap;
+  }
+
+  .addon-stepper {
+    gap: 10px;
+  }
+
   /* section names: big, bold, uppercase, centered — no side rules */
   .section-heading {
     display: block;
