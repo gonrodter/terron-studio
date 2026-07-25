@@ -5290,6 +5290,21 @@ h1 span {
     gap: 10px;
   }
 
+  /* service-type tabs: wrap into rows instead of horizontal scroll */
+  .pricing-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: visible;
+    border-radius: 20px;
+    row-gap: 6px;
+  }
+
+  .pricing-tab {
+    flex: 0 0 auto;
+  }
+
   /* section names: big, bold, uppercase, centered — no side rules */
   .section-heading {
     display: block;
