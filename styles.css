@@ -4488,8 +4488,13 @@ h1 span {
 .pricing-config-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.pricing-config-head h3 {
+  min-width: 0;
 }
 
 .pricing-note {
@@ -4516,6 +4521,7 @@ h1 span {
 .pricing-days {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 6px;
   padding: 5px 11px;
   border: 1px solid var(--line);
@@ -4524,9 +4530,11 @@ h1 span {
   color: var(--muted);
   font-size: 12px;
   font-weight: 760;
+  white-space: nowrap;
 }
 
 .clock {
+  flex: 0 0 auto;
   width: 12px;
   height: 12px;
   border: 1.6px solid currentColor;
@@ -5280,14 +5288,41 @@ h1 span {
     text-align: left;
   }
 
+  /* cap panel column to container so nowrap content can't widen the card */
+  .pricing-panel,
+  .retainer-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pricing-config,
+  .pricing-summary,
+  .retainer-config {
+    min-width: 0;
+  }
+
   /* keep addon label + price on one line each */
   .addon-label,
   .addon-price {
     white-space: nowrap;
   }
 
-  .addon-stepper {
+  /* tighten addon row so the single line fits narrow phones */
+  .addon-row {
+    padding: 0 12px;
     gap: 10px;
+  }
+
+  .addon-stepper {
+    gap: 8px;
+  }
+
+  .stepper {
+    gap: 6px;
+  }
+
+  .stepper button {
+    width: 24px;
+    height: 24px;
   }
 
   /* service-type tabs: wrap into rows instead of horizontal scroll */
