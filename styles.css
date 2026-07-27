@@ -6095,6 +6095,14 @@ body.modal-open {
     text-align: center;
   }
 
+  .letter-sign > div {
+    order: 1;
+  }
+
+  .letter-sign .sign-mark {
+    order: 2;
+  }
+
   .faq-title {
     max-width: 100%;
     margin-left: auto;
