@@ -6087,6 +6087,11 @@ body.modal-open {
     text-align: center;
   }
 
+  .letter-sign {
+    justify-content: center;
+    text-align: center;
+  }
+
   .faq-title {
     max-width: 100%;
     margin-left: auto;
