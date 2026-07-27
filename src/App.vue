@@ -164,7 +164,11 @@ const navItems = [
 ];
 
 const mobileHiddenNav = new Set(["services", "studio"]);
-const mobileNavItems = navItems.filter((item) => !mobileHiddenNav.has(item.id));
+const howNavItem = { id: "how", label: "How it works", href: "#how" };
+const mobileNavItems = navItems.flatMap((item) => {
+  if (mobileHiddenNav.has(item.id)) return [];
+  return item.id === "pricing" ? [howNavItem, item] : [item];
+});
 
 const startActions = [
   { label: "Book a call", href: bookCallHref, modal: true, pillIcon: "meet" },
@@ -1176,7 +1180,7 @@ const vTilt = {
         </section>
 
         <!-- HOW IT WORKS -->
-        <section id="how" class="section how-section section-observe">
+        <section id="how" class="section how-section section-observe" data-section="how">
           <div class="section-heading"><h2>How it works</h2></div>
           <p class="section-lead">
             Simple from first hello to launch. <span class="hl">Three steps</span>, one team.
