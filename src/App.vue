@@ -157,7 +157,7 @@ const socialLinks = [
 
 const navItems = [
   { id: "top", label: "Home", href: "#top", icon: "M3 10.2 12 3l9 7.2M5 9v11h5v-6h4v6h5V9" },
-  { id: "work", label: "Work", href: "#work", icon: "M4 7h5l2 2h9v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" },
+  { id: "work", label: "Our Work", href: "#our-work", icon: "M4 7h5l2 2h9v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" },
   { id: "services", label: "Services", href: "#services", icon: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 4 1.6 3.4L17 12l-3.4 1.6L12 17l-1.6-3.4L7 12l3.4-1.6z" },
   { id: "pricing", label: "Pricing", href: "#pricing", icon: "M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
   { id: "studio", label: "Studio", href: "#studio", icon: "M4 8h16v11H4zM9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" },
@@ -167,7 +167,8 @@ const mobileHiddenNav = new Set(["services", "studio"]);
 const howNavItem = { id: "how", label: "How it works", href: "#how" };
 const mobileNavItems = navItems.flatMap((item) => {
   if (mobileHiddenNav.has(item.id)) return [];
-  return item.id === "pricing" ? [howNavItem, item] : [item];
+  const mobileItem = item.id === "work" ? { ...item, label: "Work", href: "#work" } : item;
+  return item.id === "pricing" ? [howNavItem, mobileItem] : [mobileItem];
 });
 
 const startActions = [
@@ -1110,7 +1111,7 @@ const vTilt = {
         </section>
 
         <!-- ABOUT -->
-        <section class="section about-block section-observe" data-section="studio-about">
+        <section id="our-work" class="section about-block section-observe" data-section="work">
           <div class="section-heading"><h2>Our Work</h2></div>
           <p class="work-lead">
             Different products. Different audiences. Different energy.<br />
