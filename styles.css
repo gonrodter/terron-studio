@@ -2229,6 +2229,10 @@ h1 span {
     display: none;
   }
 
+  .section-observe {
+    scroll-margin-top: 82px;
+  }
+
   .mobile-header {
     position: sticky;
     top: 0;

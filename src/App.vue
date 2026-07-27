@@ -121,6 +121,9 @@ const navItems = [
   { id: "studio", label: "Studio", href: "#studio", icon: "M4 8h16v11H4zM9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" },
 ];
 
+const mobileHiddenNav = new Set(["services", "studio"]);
+const mobileNavItems = navItems.filter((item) => !mobileHiddenNav.has(item.id));
+
 const startActions = [
   { label: "Book a call", href: bookCallHref, modal: true, pillIcon: "meet" },
   { label: "Send a message", href: `mailto:${email}`, pillIcon: "send" },
@@ -449,7 +452,9 @@ function getSectionTop(section) {
 }
 
 function setActiveSection() {
-  const sections = Array.from(document.querySelectorAll("[data-section]"));
+  const sections = Array.from(document.querySelectorAll("[data-section]")).filter(
+    (section) => section.offsetParent !== null
+  );
   if (!sections.length) return;
 
   const anchor = getScrollTop() + 160;
@@ -492,6 +497,16 @@ function handleAnchorClick(event) {
 
   if (mobileMenuOpen.value) {
     setMobileMenuOpen(false);
+  }
+
+  if (href === "#top") {
+    event.preventDefault();
+    if (isMobile.value) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      contentRef.value?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    return;
   }
 
   if (!target || !contentRef.value || isMobile.value) return;
@@ -843,7 +858,7 @@ const vTilt = {
     <nav id="mobile-menu" class="mobile-menu" :class="{ 'is-open': mobileMenuOpen }" aria-label="Mobile navigation">
       <div>
         <a
-          v-for="item in navItems"
+          v-for="item in mobileNavItems"
           :key="item.id"
           class="mobile-menu-link"
           :class="{ 'is-active': activeSection === item.id }"
