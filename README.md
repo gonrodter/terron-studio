@@ -23,3 +23,13 @@ Then open `http://127.0.0.1:8080/`.
 ```sh
 npm run build
 ```
+
+## PostHog
+
+Copy `.env.example` to `.env` and set the project token for the EU PostHog
+project. Configure the same variables in the production hosting provider:
+
+```sh
+VITE_POSTHOG_PROJECT_TOKEN=phc_your_project_token
+VITE_POSTHOG_HOST=https://eu.i.posthog.com
+```

@@ -1,5 +1,13 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import posthog from "posthog-js";
+
+const posthogEnabled = Boolean(
+  import.meta.env.VITE_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_POSTHOG_HOST
+);
+const captureEvent = (eventName, properties) => {
+  if (posthogEnabled) posthog.capture(eventName, properties);
+};
 
 const assetMap = {
   "terron-logo.png": new URL("../assets/terron-logo.png", import.meta.url).href,
@@ -13,6 +21,7 @@ const assetMap = {
   "powerpool-logo.webp": new URL("../assets/powerpool-logo.webp", import.meta.url).href,
   "collecta-logo.webp": new URL("../assets/collecta-logo.webp", import.meta.url).href,
   "burntab-logo.png": new URL("../assets/burntab-logo.png", import.meta.url).href,
+  "ducati-logo.png": new URL("../assets/ducati-logo.png", import.meta.url).href,
   "bbva-logo.webp": new URL("../assets/bbva-logo.webp", import.meta.url).href,
   "cambridge-logo.png": new URL("../assets/cambridge-logo.png", import.meta.url).href,
   "collecta-site.png": new URL("../assets/collecta-site.png", import.meta.url).href,
@@ -32,61 +41,94 @@ const bookCallHref = "https://cal.eu/terron-studio/15min";
 
 const bookModalOpen = ref(false);
 
-const aboutFonts = [
-  { label: "Inter", value: "'Inter', system-ui, sans-serif" },
-  { label: "Phudu", value: "var(--font-display)" },
-  { label: "Caveat", value: "var(--font-hand)" },
-  { label: "Georgia", value: "Georgia, 'Times New Roman', serif" },
-  { label: "Mono", value: "'SFMono-Regular', Menlo, monospace" },
-];
-const aboutWeights = [
-  { label: "Light", value: 300 },
-  { label: "Regular", value: 400 },
-  { label: "Medium", value: 500 },
-  { label: "Semibold", value: 600 },
-  { label: "Bold", value: 700 },
-  { label: "Black", value: 800 },
-];
-const aboutSizes = [20, 28, 40];
-const aboutText = {
-  family: ref(aboutFonts[0].value),
-  weight: ref(600),
-  bold: ref(false),
-  italic: ref(false),
-  underline: ref(false),
-  align: ref("left"),
-  size: ref(28),
-};
-const aboutAlignPos = {
-  left: { left: "0", tx: "0" },
-  center: { left: "50%", tx: "-50%" },
-  right: { left: "100%", tx: "-100%" },
-};
-const aboutTextStyle = computed(() => {
-  const pos = aboutAlignPos[aboutText.align.value] || aboutAlignPos.left;
-  return {
-    fontFamily: aboutText.family.value,
-    fontWeight: aboutText.bold.value ? 800 : aboutText.weight.value,
-    fontStyle: aboutText.italic.value ? "italic" : "normal",
-    textDecoration: aboutText.underline.value ? "underline" : "none",
-    fontSize: `${aboutText.size.value}px`,
-    left: pos.left,
-    transform: `translateX(${pos.tx})`,
-  };
-});
-const aboutBoxStyle = computed(() => ({
-  height: `${Math.round(aboutText.size.value * 1.4)}px`,
-}));
-
 function openBook(event) {
   if (event) event.preventDefault();
   bookModalOpen.value = true;
   document.body.classList.add("modal-open");
+  captureEvent("book_call_clicked");
 }
 
 function closeBook() {
   bookModalOpen.value = false;
   document.body.classList.remove("modal-open");
+}
+
+const serviceRows = [
+  ["Landing pages", "Website design", "Web apps", "Mobile apps"],
+  ["Branding", "Product design", "Development", "Pitch decks"],
+  ["UI design", "Web apps", "Landing pages", "Development"],
+];
+
+const faqs = [
+  {
+    q: "What does Terron Studio actually do?",
+    a: "We design and build digital products end to end: websites, apps and product interfaces. UI, branding, motion and development handled by one team, so nothing feels stitched together.",
+  },
+  {
+    q: "Design only, or development too?",
+    a: "Both. That's the point. We take a product from first design to shipped code without handing it off to anyone else.",
+  },
+  {
+    q: "How long does a project take?",
+    a: "Most projects move in days, not months. It depends on scope, and you'll have a clear timeline after our first call.",
+  },
+  {
+    q: "One-time project or monthly retainer: which do I pick?",
+    a: "Pick a one-time plan for a defined project with a clear finish. Pick the retainer for ongoing design and development on tap. Not sure? We'll help you choose on the call.",
+  },
+  {
+    q: "Can I pause or cancel the retainer?",
+    a: "Yes. Pause or cancel anytime, no lock-in, no penalty.",
+  },
+  {
+    q: "How many revisions do I get?",
+    a: "Unlimited. We refine until it feels right, not until a counter runs out.",
+  },
+  {
+    q: "What if I only have one small thing?",
+    a: "That's fine. Small jobs are welcome. Reach out and we'll scope it quickly.",
+  },
+  {
+    q: "How do we start?",
+    a: "Book a 15-minute call or send a message. We'll work out the fit and take it from there.",
+  },
+];
+
+const openFaq = ref(-1);
+
+function toggleFaq(index) {
+  const isOpening = openFaq.value !== index;
+  openFaq.value = isOpening ? index : -1;
+  captureEvent("faq_toggled", { question_index: index, opened: isOpening });
+}
+
+function handleProjectLinkClick(project) {
+  captureEvent("project_link_clicked", { project_name: project.name });
+}
+
+function handleMessageClick() {
+  captureEvent("message_clicked");
+}
+
+function handleServiceCategoryClick(cat, event) {
+  captureEvent("service_category_clicked", { category_label: cat.label });
+  if (cat.href) handleAnchorClick(event);
+}
+
+function toggleDevAddon() {
+  addDev.value = !addDev.value;
+  captureEvent("dev_addon_toggled", { enabled: addDev.value });
+}
+
+function decrementRetainerTasks() {
+  if (retainerTasks.value === 1) return;
+  retainerTasks.value = Math.max(1, retainerTasks.value - 1);
+  captureEvent("retainer_task_count_changed", { task_count: retainerTasks.value });
+}
+
+function incrementRetainerTasks() {
+  retainerTasks.value++;
+  captureEvent("retainer_task_count_changed", { task_count: retainerTasks.value });
 }
 
 const socialLinks = [
@@ -132,10 +174,10 @@ const startActions = [
 const companies = [
   { name: "Konecta", file: "konecta-logo.jpeg", rounded: true },
   { name: "SNGULAR", file: "sngular-logo.webp", rounded: true },
-  { name: "TuParty", file: "tuparty-logo.png", rounded: true },
+  { name: "Vertical Group", file: "vertical-logo.png", rounded: true, white: true, inset: true },
+  { name: "Ducati", file: "ducati-logo.png" },
   { name: "PowerPool", file: "powerpool-logo.webp", rounded: true, white: true },
   { name: "Collecta", file: "collecta-logo.webp" },
-  { name: "BurnTab", file: "burntab-logo.png" },
 ];
 
 const projects = [
@@ -186,6 +228,17 @@ function heroPrev() {
 
 function heroNext() {
   heroSlide.value = (heroSlide.value + 1) % heroSlides.length;
+}
+
+const workSlide = ref(0);
+let workTimer = null;
+
+function workPrev() {
+  workSlide.value = (workSlide.value - 1 + projects.length) % projects.length;
+}
+
+function workNext() {
+  workSlide.value = (workSlide.value + 1) % projects.length;
 }
 
 const strokeIcon = (d) =>
@@ -316,10 +369,12 @@ const activeTier = computed(() => pricingTabs.find((tab) => tab.id === activeTab
 const retainerTasks = ref(1);
 
 function selectTab(id) {
+  const tab = pricingTabs.find((t) => t.id === id);
   activeTab.value = id;
   addDev.value = false;
   extraPages.value = 0;
   extraAnims.value = 0;
+  captureEvent("pricing_tab_selected", { tab_id: id, tab_label: tab?.label });
   nextTick(() => {
     updateTabIndicator();
     tabsWrap.value
@@ -559,21 +614,27 @@ function setupRevealObserver() {
         ".hero-inner > *",
         ".hero-media",
         ".narrative p",
-        ".problem-block > *",
-        ".solution-block > *",
-        ".board",
+        ".problem-block > *:not(.problem-points)",
+        ".problem-points li",
+        ".solution-block > *:not(.board)",
+        ".board-card",
         ".about-block > *",
         ".studio-lead",
         ".studio-section .story-copy p",
         ".section-lead",
         ".category",
         ".transition-note",
+        ".pricing-tabs",
         ".pricing-panel",
+        ".retainer-card",
+        ".faq-title",
+        ".faq-item",
         ".team-card",
         ".letter p:not(.letter-label)",
         ".letter-sign",
         ".final-cta > *",
         ".service-card",
+        ".how-card",
       ].join(", ")
     )
   );
@@ -596,6 +657,7 @@ function setupRevealObserver() {
     ".problem-lead",
     ".problem-points li",
     ".solution-lead",
+    ".solution-motto",
     ".transition-note",
     ".section-lead",
     ".studio-lead",
@@ -635,8 +697,11 @@ function setupRevealObserver() {
     accentsByOwner.get(owner).push(accent);
   });
 
-  const reveal = (target) => {
-    const delay = Number.parseFloat(target.style.getPropertyValue("--reveal-delay")) || 0;
+  const reveal = (target, delayOverride) => {
+    const delay =
+      delayOverride != null
+        ? delayOverride
+        : Number.parseFloat(target.style.getPropertyValue("--reveal-delay")) || 0;
     window.setTimeout(() => {
       target.classList.add("is-visible");
       const keycaps =
@@ -659,6 +724,50 @@ function setupRevealObserver() {
     });
   });
 
+  // Visual blocks (media, board, tabs, card grids) only wait for the copy above
+  // them when they share the first screen — e.g. the hero, where text and media
+  // reveal together on load: read first, then the visual lands. This longer gate
+  // is stored separately and applied ONLY to elements already in view at load.
+  // Scrolled-to blocks skip it (the copy above is already read) and just use
+  // their normal stagger, so they never lag behind the scroll.
+  const seqDelay = new Map();
+  const sequencedSelector = [
+    ".hero-media",
+    ".board",
+    ".category-grid",
+    ".how-steps",
+    ".pricing-tabs",
+    ".pricing-shell",
+    ".retainer-card",
+  ].join(", ");
+  const REVEAL_GAP = 120;
+  const revealDuration = (el) => (el.classList.contains("line-reveal") ? 900 : 760);
+  const startOf = (el) => {
+    const base = Number.parseFloat(el.style.getPropertyValue("--reveal-delay")) || 0;
+    const heroIndex = heroTargets.indexOf(el);
+    return base + (heroIndex >= 0 ? heroIndex * 90 : 0);
+  };
+  Array.from(document.querySelectorAll(sequencedSelector)).forEach((comp) => {
+    const section = comp.closest(".hero, .section");
+    if (!section) return;
+    let textFinish = 0;
+    targets.forEach((t) => {
+      if (comp.contains(t) || !section.contains(t)) return;
+      if (t.closest(sequencedSelector)) return; // gate on copy, not on other visuals
+      if (!(comp.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_PRECEDING)) return;
+      textFinish = Math.max(textFinish, startOf(t) + revealDuration(t));
+    });
+    const start = textFinish + REVEAL_GAP;
+    const compTargets = comp.matches(".scroll-reveal")
+      ? [comp]
+      : targets.filter((t) => comp.contains(t));
+    if (!compTargets.length) return;
+    const localBase = Math.min(...compTargets.map(startOf));
+    compTargets.forEach((t) => {
+      seqDelay.set(t, start + (startOf(t) - localBase));
+    });
+  });
+
   if (reduceMotion || !targets.length) {
     targets.forEach((target) => target.classList.add("is-visible"));
     accents.forEach((accent) => accent.classList.add("is-lit"));
@@ -672,7 +781,7 @@ function setupRevealObserver() {
   targets.forEach((target) => {
     const bounds = target.getBoundingClientRect();
     if (rootBounds && bounds.top < rootBounds.bottom && bounds.bottom > rootBounds.top) {
-      reveal(target);
+      reveal(target, seqDelay.get(target));
     }
   });
 
@@ -709,6 +818,8 @@ onMounted(async () => {
     heroSlide.value = (heroSlide.value + 1) % heroSlides.length;
   }, 3200);
 
+  workTimer = window.setInterval(workNext, 4600);
+
   setupRevealObserver();
   setActiveSection();
   updateTabIndicator();
@@ -725,6 +836,7 @@ onBeforeUnmount(() => {
   revealObserver?.disconnect();
   if (companyLogosAnimationTimer) window.clearTimeout(companyLogosAnimationTimer);
   if (heroTimer) window.clearInterval(heroTimer);
+  if (workTimer) window.clearInterval(workTimer);
   if (categoryMagnetFrame) cancelAnimationFrame(categoryMagnetFrame);
   document.body.classList.remove("mobile-menu-open");
   if (navFrame) cancelAnimationFrame(navFrame);
@@ -803,7 +915,7 @@ const vTilt = {
             :key="action.label"
             class="rail-action"
             :href="action.href"
-            @click="action.modal && openBook($event)"
+            @click="action.modal ? openBook($event) : handleMessageClick()"
           >
             <span class="rail-icon accent" aria-hidden="true">
               <span class="pill-icon" :class="action.pillIcon"></span>
@@ -815,7 +927,7 @@ const vTilt = {
       </div>
 
       <div class="sidebar-bottom">
-        <p class="rail-label"><span class="rail-label-lighter">Trusted by</span> 8+ teams</p>
+        <p class="rail-label"><span class="rail-label-lighter">Trusted by</span> 8+ companies</p>
         <div
           class="company-logo-grid"
           :class="{ 'is-animating': companyLogosAnimating }"
@@ -824,7 +936,7 @@ const vTilt = {
           <img
             v-for="(company, index) in companies"
             :key="company.name"
-            :class="{ 'logo-rounded': company.rounded, 'logo-white': company.white }"
+            :class="{ 'logo-rounded': company.rounded, 'logo-white': company.white, 'logo-inset': company.inset }"
             :style="{ '--logo-index': index }"
             :src="asset(company.file)"
             :alt="company.name"
@@ -873,12 +985,12 @@ const vTilt = {
       </div>
 
       <div class="sidebar-bottom">
-        <p class="rail-label"><span class="rail-label-lighter">Trusted by</span> 8+ teams</p>
+        <p class="rail-label"><span class="rail-label-lighter">Trusted by</span> 8+ companies</p>
         <div class="company-logo-grid">
           <img
             v-for="company in companies"
             :key="company.name"
-            :class="{ 'logo-rounded': company.rounded, 'logo-white': company.white }"
+            :class="{ 'logo-rounded': company.rounded, 'logo-white': company.white, 'logo-inset': company.inset }"
             :src="asset(company.file)"
             :alt="company.name"
           />
@@ -978,6 +1090,7 @@ const vTilt = {
               :href="projects[index] ? projects[index].href : '#work'"
               target="_blank"
               rel="noreferrer"
+              @click="projects[index] && handleProjectLinkClick(projects[index])"
             >
               <span class="board-photo"><img :src="asset(card.image)" :alt="card.caption" /></span>
               <span class="board-caption">{{ card.caption }}</span>
@@ -994,83 +1107,52 @@ const vTilt = {
 
         <!-- ABOUT -->
         <section class="section about-block section-observe" data-section="studio-about">
-          <div class="section-heading"><h2>About Terron Studio</h2></div>
-          <p class="about-lead">
-            There's a reason we work as a studio and not a roster.<br />
-            We're known for one thing:
+          <div class="section-heading"><h2>Our Work</h2></div>
+          <p class="work-lead">
+            Different products. Different audiences. Different energy.<br />
+            Always the <span class="mark green">same level of care.</span>
           </p>
-          <div class="about-box">
-            <div class="edit-toolbar">
-              <label class="et-field">
-                <select class="et-select" v-model="aboutText.family.value" aria-label="Font">
-                  <option v-for="f in aboutFonts" :key="f.label" :value="f.value">{{ f.label }}</option>
-                </select>
-                <span class="et-chevron"></span>
-              </label>
-              <label class="et-field">
-                <select class="et-select" v-model.number="aboutText.weight.value" aria-label="Weight">
-                  <option v-for="w in aboutWeights" :key="w.value" :value="w.value">{{ w.label }}</option>
-                </select>
-                <span class="et-chevron"></span>
-              </label>
-              <label class="et-field">
-                <select class="et-select" v-model.number="aboutText.size.value" aria-label="Size">
-                  <option v-for="s in aboutSizes" :key="s" :value="s">{{ s }}px</option>
-                </select>
-                <span class="et-chevron"></span>
-              </label>
-              <span class="et-sep"></span>
-              <button type="button" class="et-btn et-bold" :class="{ 'is-active': aboutText.bold.value }" @click="aboutText.bold.value = !aboutText.bold.value">B</button>
-              <button type="button" class="et-btn et-italic" :class="{ 'is-active': aboutText.italic.value }" @click="aboutText.italic.value = !aboutText.italic.value">I</button>
-              <button type="button" class="et-btn et-underline" :class="{ 'is-active': aboutText.underline.value }" @click="aboutText.underline.value = !aboutText.underline.value">U</button>
-              <span class="et-sep"></span>
-              <button type="button" class="et-btn et-align" :class="{ 'is-active': aboutText.align.value === 'left' }" @click="aboutText.align.value = 'left'"><i></i><i></i><i></i></button>
-              <button type="button" class="et-btn et-align align-center" :class="{ 'is-active': aboutText.align.value === 'center' }" @click="aboutText.align.value = 'center'"><i></i><i></i><i></i></button>
-              <button type="button" class="et-btn et-align align-right" :class="{ 'is-active': aboutText.align.value === 'right' }" @click="aboutText.align.value = 'right'"><i></i><i></i><i></i></button>
-            </div>
-            <span class="about-box-text" :style="aboutBoxStyle">
-              <span class="about-box-inner" :style="aboutTextStyle">Versatility</span>
-            </span>
-          </div>
-          <p class="about-body">
-            That's how we approach design. We don't force one “Terron style” onto everything…<br />
-            Different products. Different audiences. Different energy.
-          </p>
-          <p class="about-body">Same level of care. See it yourself :)</p>
-        </section>
-
-        <!-- SHOWCASE categories -->
-        <section id="services" class="section showcase-block section-observe" data-section="services">
-          <div class="hero-media compact" aria-label="Studio preview">
+          <div class="hero-media compact work-media" aria-label="Selected work">
             <div class="carousel">
               <div
                 class="carousel-track"
-                :style="{ transform: `translateX(-${heroSlide * 100}%)` }"
+                :style="{ transform: `translateX(-${workSlide * 100}%)` }"
               >
-                <div v-for="slide in heroSlides" :key="`c-${slide}`" class="carousel-slide">
-                  <img :src="asset(slide)" alt="" aria-hidden="true" />
-                </div>
+                <a
+                  v-for="project in projects"
+                  :key="`w-${project.name}`"
+                  class="carousel-slide work-slide"
+                  :href="project.href"
+                  target="_blank"
+                  rel="noreferrer"
+                  @click="handleProjectLinkClick(project)"
+                >
+                  <img :src="asset(project.image)" :alt="project.alt" />
+                </a>
               </div>
-              <button class="carousel-arrow prev" type="button" aria-label="Previous" @click="heroPrev">
+              <button class="carousel-arrow prev" type="button" aria-label="Previous" @click="workPrev">
                 <span></span>
               </button>
-              <button class="carousel-arrow next" type="button" aria-label="Next" @click="heroNext">
+              <button class="carousel-arrow next" type="button" aria-label="Next" @click="workNext">
                 <span></span>
               </button>
               <div class="carousel-dots">
                 <button
-                  v-for="(slide, index) in heroSlides"
-                  :key="`d-${slide}`"
+                  v-for="(project, index) in projects"
+                  :key="`wd-${project.name}`"
                   type="button"
                   class="carousel-dot"
-                  :class="{ 'is-active': heroSlide === index }"
-                  :aria-label="`Go to slide ${index + 1}`"
-                  @click="heroSlide = index"
+                  :class="{ 'is-active': workSlide === index }"
+                  :aria-label="`Go to ${project.name}`"
+                  @click="workSlide = index"
                 ></button>
               </div>
             </div>
           </div>
+        </section>
 
+        <!-- SHOWCASE categories -->
+        <section id="services" class="section showcase-block section-observe" data-section="services">
           <div
             class="category-grid"
             ref="categoryGridRef"
@@ -1084,13 +1166,83 @@ const vTilt = {
               class="category"
               :class="{ 'is-featured': cat.featured }"
               :href="cat.href"
-              @click="cat.href && handleAnchorClick($event)"
+              @click="handleServiceCategoryClick(cat, $event)"
             >
               <span class="category-icon" aria-hidden="true" v-html="cat.svg"></span>
               <span class="category-label">{{ cat.label }}</span>
             </component>
           </div>
 
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section id="how" class="section how-section section-observe">
+          <div class="section-heading"><h2>How it works</h2></div>
+          <p class="section-lead">
+            Simple from first hello to launch. <span class="hl">Three steps</span>, one team.
+          </p>
+          <div class="how-steps">
+            <!-- 1 · Book a call -->
+            <article class="how-card how-card--book">
+              <div class="how-visual">
+                <div class="how-mock">
+                  <div class="how-mock-head">
+                    <span>15-min intro call</span>
+                    <span class="how-mock-clock" aria-hidden="true"></span>
+                  </div>
+                  <div class="how-mock-time">Free · No commitment</div>
+                  <ul class="how-mock-rows">
+                    <li>Quick fit check</li>
+                    <li>Scope &amp; timeline</li>
+                    <li>Next steps</li>
+                  </ul>
+                  <a class="how-mock-cta" :href="bookCallHref" @click="openBook($event)">
+                    <span class="pill-icon meet" aria-hidden="true"></span>
+                    Book a call
+                  </a>
+                </div>
+              </div>
+              <div class="how-body">
+                <h3>Book a call</h3>
+                <p>15 minutes. Tell us what you're building and where you want it to go.</p>
+              </div>
+            </article>
+
+            <!-- 2 · We design & build -->
+            <article class="how-card how-card--build">
+              <div class="how-visual">
+                <div class="how-marquee" aria-hidden="true">
+                  <div class="how-mq-row" v-for="(row, ri) in serviceRows" :key="ri">
+                    <div class="how-mq-track" :class="`how-mq-track--${ri}`">
+                      <span v-for="(p, i) in [...row, ...row]" :key="i" class="how-pill">{{ p }}</span>
+                    </div>
+                  </div>
+                </div>
+                <span class="how-logo-tile" aria-hidden="true">
+                  <img :src="asset('terron-logo.png')" alt="" />
+                </span>
+              </div>
+              <div class="how-body">
+                <h3>We design &amp; build</h3>
+                <p>One team handles the whole thing end to end: design, branding and development. You see progress as we go.</p>
+              </div>
+            </article>
+
+            <!-- 3 · Launch -->
+            <article class="how-card how-card--launch">
+              <div class="how-visual">
+                <div class="how-stack" aria-hidden="true">
+                  <img class="how-shot how-shot--1" :src="asset('burntab-site.png')" alt="" />
+                  <img class="how-shot how-shot--2" :src="asset('collecta-site.png')" alt="" />
+                  <img class="how-shot how-shot--3" :src="asset('studio-site.png')" alt="" />
+                </div>
+              </div>
+              <div class="how-body">
+                <h3>Launch</h3>
+                <p>Your product ships feeling premium. We keep refining until it's right.</p>
+              </div>
+            </article>
+          </div>
         </section>
 
         <!-- TRANSITION -->
@@ -1147,7 +1299,7 @@ const vTilt = {
                 type="button"
                 class="addon-toggle"
                 :class="{ 'is-on': addDev }"
-                @click="addDev = !addDev"
+                @click="toggleDevAddon()"
               >
                 <span class="addon-label">
                   {{ activeTier.addons.dev.label }}
@@ -1192,7 +1344,7 @@ const vTilt = {
                 <span class="price-card-label">{{ activeTier.label2 }}</span>
                 <span class="price-card-value">{{ euro(totalPrice) }}</span>
               </div>
-              <a class="button primary" :href="`mailto:${email}`">
+              <a class="button primary" :href="`mailto:${email}`" @click="handleMessageClick()">
                 <span class="pill-icon send" aria-hidden="true"></span>
                 Send a message
               </a>
@@ -1211,9 +1363,9 @@ const vTilt = {
               <div class="addon-row">
                 <span class="addon-label">Active task</span>
                 <span class="stepper green">
-                  <button type="button" @click="retainerTasks = Math.max(1, retainerTasks - 1)" aria-label="Less tasks">–</button>
+                  <button type="button" @click="decrementRetainerTasks()" aria-label="Less tasks">–</button>
                   <b>{{ retainerTasks }}</b>
-                  <button type="button" @click="retainerTasks++" aria-label="More tasks">+</button>
+                  <button type="button" @click="incrementRetainerTasks()" aria-label="More tasks">+</button>
                 </span>
               </div>
               <ul class="pricing-features">
@@ -1288,6 +1440,34 @@ const vTilt = {
               See projects
             </a>
           </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="section faq-section section-observe">
+          <h2 class="faq-title">Still have questions?</h2>
+          <ul class="faq-list">
+            <li
+              v-for="(item, i) in faqs"
+              :key="i"
+              class="faq-item"
+              :class="{ 'is-open': openFaq === i }"
+            >
+              <button
+                type="button"
+                class="faq-q"
+                :aria-expanded="String(openFaq === i)"
+                @click="toggleFaq(i)"
+              >
+                <span>{{ item.q }}</span>
+                <span class="faq-chevron" aria-hidden="true"></span>
+              </button>
+              <div class="faq-a-wrap">
+                <div class="faq-a-inner">
+                  <p class="faq-a">{{ item.a }}</p>
+                </div>
+              </div>
+            </li>
+          </ul>
         </section>
       </div>
     </main>
