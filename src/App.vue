@@ -1,6 +1,37 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import posthog from "posthog-js";
+import { lang, messages } from "./i18n";
+
+const t = computed(() => messages[lang.value]);
+
+const langFading = ref(false);
+let langFadeTimer = null;
+
+function setLang(l) {
+  if (lang.value === l || langFading.value) return;
+  captureEvent("language_changed", { language: l });
+  langFading.value = true;
+  if (langFadeTimer) clearTimeout(langFadeTimer);
+  langFadeTimer = setTimeout(() => {
+    lang.value = l;
+    nextTick(() => {
+      langFadeTimer = setTimeout(() => {
+        langFading.value = false;
+        langFadeTimer = null;
+      }, 20);
+    });
+  }, 240);
+}
+
+watch(
+  lang,
+  (l) => {
+    document.documentElement.lang = l;
+    document.title = messages[l].docTitle;
+  },
+  { immediate: true }
+);
 
 const posthogEnabled = Boolean(
   import.meta.env.VITE_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_POSTHOG_HOST
@@ -53,46 +84,9 @@ function closeBook() {
   document.body.classList.remove("modal-open");
 }
 
-const serviceRows = [
-  ["Landing pages", "Website design", "Web apps", "Mobile apps"],
-  ["Branding", "Product design", "Development", "Pitch decks"],
-  ["UI design", "Web apps", "Landing pages", "Development"],
-];
+const serviceRows = computed(() => t.value.how.serviceRows);
 
-const faqs = [
-  {
-    q: "What does Terron Studio actually do?",
-    a: "We design and build digital products end to end: websites, apps and product interfaces. UI, branding, motion and development handled by one team, so nothing feels stitched together.",
-  },
-  {
-    q: "Design only, or development too?",
-    a: "Both. That's the point. We take a product from first design to shipped code without handing it off to anyone else.",
-  },
-  {
-    q: "How long does a project take?",
-    a: "Most projects move in days, not months. It depends on scope, and you'll have a clear timeline after our first call.",
-  },
-  {
-    q: "One-time project or monthly retainer: which do I pick?",
-    a: "Pick a one-time plan for a defined project with a clear finish. Pick the retainer for ongoing design and development on tap. Not sure? We'll help you choose on the call.",
-  },
-  {
-    q: "Can I pause or cancel the retainer?",
-    a: "Yes. Pause or cancel anytime, no lock-in, no penalty.",
-  },
-  {
-    q: "How many revisions do I get?",
-    a: "Unlimited. We refine until it feels right, not until a counter runs out.",
-  },
-  {
-    q: "What if I only have one small thing?",
-    a: "That's fine. Small jobs are welcome. Reach out and we'll scope it quickly.",
-  },
-  {
-    q: "How do we start?",
-    a: "Book a 15-minute call or send a message. We'll work out the fit and take it from there.",
-  },
-];
+const faqs = computed(() => t.value.faq.items);
 
 const openFaq = ref(-1);
 
@@ -155,25 +149,31 @@ const socialLinks = [
   },
 ];
 
-const navItems = [
-  { id: "top", label: "Home", href: "#top", icon: "M3 10.2 12 3l9 7.2M5 9v11h5v-6h4v6h5V9" },
-  { id: "work", label: "Our Work", href: "#our-work", icon: "M4 7h5l2 2h9v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" },
-  { id: "how", label: "How it works", href: "#how", icon: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 4 1.6 3.4L17 12l-3.4 1.6L12 17l-1.6-3.4L7 12l3.4-1.6z" },
-  { id: "pricing", label: "Pricing", href: "#pricing", icon: "M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
-  { id: "studio", label: "Studio", href: "#studio", icon: "M4 8h16v11H4zM9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" },
+const navMeta = [
+  { id: "top", href: "#top", icon: "M3 10.2 12 3l9 7.2M5 9v11h5v-6h4v6h5V9" },
+  { id: "work", href: "#our-work", icon: "M4 7h5l2 2h9v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" },
+  { id: "how", href: "#how", icon: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 4 1.6 3.4L17 12l-3.4 1.6L12 17l-1.6-3.4L7 12l3.4-1.6z" },
+  { id: "pricing", href: "#pricing", icon: "M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
+  { id: "studio", href: "#studio", icon: "M4 8h16v11H4zM9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" },
 ];
+
+const navItems = computed(() =>
+  navMeta.map((item) => ({ ...item, label: t.value.nav[item.id] }))
+);
 
 const mobileHiddenNav = new Set(["studio"]);
-const mobileNavItems = navItems.flatMap((item) => {
-  if (mobileHiddenNav.has(item.id)) return [];
-  const mobileItem = item.id === "work" ? { ...item, label: "Work", href: "#work" } : item;
-  return [mobileItem];
-});
+const mobileNavItems = computed(() =>
+  navMeta.flatMap((item) => {
+    if (mobileHiddenNav.has(item.id)) return [];
+    if (item.id === "work") return [{ ...item, label: t.value.nav.workMobile, href: "#work" }];
+    return [{ ...item, label: t.value.nav[item.id] }];
+  })
+);
 
-const startActions = [
-  { label: "Book a call", href: bookCallHref, modal: true, pillIcon: "meet" },
-  { label: "Send a message", href: `mailto:${email}`, pillIcon: "send" },
-];
+const startActions = computed(() => [
+  { label: t.value.bookCall, href: bookCallHref, modal: true, pillIcon: "meet" },
+  { label: t.value.sendMessage, href: `mailto:${email}`, pillIcon: "send" },
+]);
 
 const companies = [
   { name: "Konecta", file: "konecta-logo.jpeg", rounded: true },
@@ -184,43 +184,17 @@ const companies = [
   { name: "Collecta", file: "collecta-logo.webp" },
 ];
 
-const projects = [
-  {
-    name: "Collecta",
-    href: "https://trycollecta.com/",
-    image: "collecta-site.png",
-    alt: "Collecta website screenshot",
-    caption: "Mobile app",
-  },
-  {
-    name: "BurnTab",
-    href: "https://burntab.com/",
-    image: "burntab-site.png",
-    alt: "BurnTab website screenshot",
-    caption: "macOS product",
-  },
-  {
-    name: "Aparicio & Alemany",
-    href: "https://aparicio-alemany-arquitectos.vercel.app/",
-    image: "studio-site.png",
-    alt: "Aparicio & Alemany architecture studio website screenshot",
-    caption: "Premium studio site",
-  },
-  {
-    name: "Ducati W93",
-    href: "https://www.ducatiweare93.com/",
-    image: "ducati-site.png",
-    alt: "Ducati W93 contest website screenshot",
-    caption: "Campaign site",
-  },
-  {
-    name: "PowerPool",
-    href: "https://powerpool.io/",
-    image: "powerpool-site.png",
-    alt: "PowerPool website screenshot",
-    caption: "Corporate site",
-  },
+const projectMeta = [
+  { name: "Collecta", href: "https://trycollecta.com/", image: "collecta-site.png" },
+  { name: "BurnTab", href: "https://burntab.com/", image: "burntab-site.png" },
+  { name: "Aparicio & Alemany", href: "https://aparicio-alemany-arquitectos.vercel.app/", image: "studio-site.png" },
+  { name: "Ducati W93", href: "https://www.ducatiweare93.com/", image: "ducati-site.png" },
+  { name: "PowerPool", href: "https://powerpool.io/", image: "powerpool-site.png" },
 ];
+
+const projects = computed(() =>
+  projectMeta.map((p, i) => ({ ...p, alt: t.value.work.projectAlts[i] }))
+);
 
 const heroSlides = ["collecta-site.png", "burntab-site.png", "studio-site.png", "powerpool-site.png", "tuparty-site.png"];
 const heroSlide = ref(0);
@@ -238,51 +212,45 @@ const workSlide = ref(0);
 let workTimer = null;
 
 function workPrev() {
-  workSlide.value = (workSlide.value - 1 + projects.length) % projects.length;
+  const n = projects.value.length;
+  workSlide.value = (workSlide.value - 1 + n) % n;
 }
 
 function workNext() {
-  workSlide.value = (workSlide.value + 1) % projects.length;
+  const n = projects.value.length;
+  workSlide.value = (workSlide.value + 1) % n;
 }
 
 const strokeIcon = (d) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
-const categories = [
+const categoryMeta = [
+  { svg: strokeIcon('<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8.5h18"/><path d="M10 12.5l-2 2 2 2"/><path d="M14 12.5l2 2-2 2"/>') },
+  { svg: strokeIcon('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20"/>') },
+  { svg: strokeIcon('<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M10.5 18h3"/>') },
+  { svg: strokeIcon('<path d="M8.5 8.5 5 12l3.5 3.5"/><path d="M15.5 8.5 19 12l-3.5 3.5"/><path d="M13.5 6l-3 12"/>') },
+  { svg: `<span class="brand-clip"><img class="brand-img" src="${asset("app-store-logo.png")}" alt="" /></span>` },
   {
-    label: "Website",
-    svg: strokeIcon('<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8.5h18"/><path d="M10 12.5l-2 2 2 2"/><path d="M14 12.5l2 2-2 2"/>'),
-  },
-  {
-    label: "Web App",
-    svg: strokeIcon('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20"/>'),
-  },
-  {
-    label: "Mobile App",
-    svg: strokeIcon('<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M10.5 18h3"/>'),
-  },
-  {
-    label: "Development",
-    svg: strokeIcon('<path d="M8.5 8.5 5 12l3.5 3.5"/><path d="M15.5 8.5 19 12l-3.5 3.5"/><path d="M13.5 6l-3 12"/>'),
-  },
-  {
-    label: "App Store screenshots",
-    svg: `<span class="brand-clip"><img class="brand-img" src="${asset("app-store-logo.png")}" alt="" /></span>`,
-  },
-  {
-    label: "See all Projects",
     href: "#work",
     featured: true,
     svg: '<svg viewBox="0 0 24 24"><defs><linearGradient id="mf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8cc5f6"/><stop offset="1" stop-color="#3f8fe6"/></linearGradient></defs><path fill="#a6d1f8" d="M3 7.2A2 2 0 0 1 5 5.2h4.1a2 2 0 0 1 1.42.6l1.06 1.06a2 2 0 0 0 1.42.59H19a2 2 0 0 1 2 2v2.05H3z"/><path fill="url(#mf)" d="M3 9.4a1.6 1.6 0 0 1 1.6-1.6h14.8A1.6 1.6 0 0 1 21 9.4v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
   },
 ];
 
-const board = [
-  { image: "collecta-site.png", caption: "Live app", pin: "red", rotate: -4 },
-  { image: "burntab-site.png", caption: "macOS app", pin: "green", rotate: 3 },
-  { image: "studio-site.png", caption: "Premium studio site", pin: "tape", rotate: -3 },
-  { image: "ducati-site.png", caption: "Campaign site", pin: "clip", rotate: 1.5 },
+const categories = computed(() =>
+  categoryMeta.map((c, i) => ({ ...c, label: t.value.categories[i] }))
+);
+
+const boardMeta = [
+  { image: "collecta-site.png", pin: "red", rotate: -4 },
+  { image: "burntab-site.png", pin: "green", rotate: 3 },
+  { image: "studio-site.png", pin: "tape", rotate: -3 },
+  { image: "ducati-site.png", pin: "clip", rotate: 1.5 },
 ];
+
+const board = computed(() =>
+  boardMeta.map((c, i) => ({ ...c, caption: t.value.solution.boardCaptions[i] }))
+);
 
 const storyArc = [
   { text: "We build our own products too — TuParty, BurnTab, Collecta." },
@@ -292,11 +260,7 @@ const storyArc = [
   { text: "Somewhere along the way the product stops feeling exciting — and trust us, it's not you." },
 ];
 
-const problemPoints = [
-  "Freelancers who never talk to each other",
-  "Design that doesn't match the product",
-  "A brand stitched from spare parts",
-];
+const problemPoints = computed(() => t.value.problem.points);
 
 const services = [
   { index: "01", title: "Landing pages", description: "High-converting pages, designed and coded to load fast and sell clearly." },
@@ -310,70 +274,46 @@ const services = [
   { index: "09", title: "Pitch decks", description: "Investor and sales decks that look like the product behind them." },
 ];
 
-const story = [
-  "Careful about the details that matter: if something doesn't feel right, we don't ship it.",
-];
+const story = computed(() => t.value.studio.story);
 
-const pricingTabs = [
-  {
-    id: "landing",
-    label: "Landing Page",
-    title: "Landing Page",
-    days: "15–20 days",
-    base: 1900,
-    label2: "Landing page design",
-    addons: {
-      dev: { label: "Add Development", price: 1200 },
-      pages: { label: "Extra Pages", price: 250, unit: "/page" },
-    },
-    features: [
-      "Custom wireframe & layout",
-      "Desktop, tablet & mobile responsive",
-      "Figma file included",
-      "No limit to revisions",
-      "Updates every 48 hours",
-    ],
-  },
-  {
-    id: "webapp",
-    label: "Web App",
-    retainerOnly: true,
-  },
-  {
-    id: "mobile",
-    label: "Mobile App",
-    retainerOnly: true,
-  },
-  {
-    id: "screenshots",
-    label: "App Store Screenshots",
-    title: "App Store Screenshots",
-    days: "5–8 days",
-    base: 800,
-    label2: "Store screenshots",
-    note: "Price is for 6 screens",
-    addons: {
-      pages: { label: "Extra Screens", price: 90, unit: "/screen" },
-    },
-    features: [
-      "6 screens included",
-      "iOS & Android sizes",
-      "Device frames & captions",
-      "No limit to revisions",
-      "Source files included",
-    ],
-  },
-];
+const pricingNums = {
+  landing: { base: 1200, addons: { dev: { price: 850 }, pages: { price: 250 } } },
+  webapp: { retainerOnly: true },
+  mobile: { retainerOnly: true },
+  screenshots: { base: 550, addons: { pages: { price: 90 } } },
+};
+const tabOrder = ["landing", "webapp", "mobile", "screenshots"];
+
+const pricingTabs = computed(() =>
+  tabOrder.map((id) => {
+    const num = pricingNums[id];
+    const txt = t.value.pricing.tabs[id];
+    if (num.retainerOnly) return { id, label: txt.label, retainerOnly: true };
+    const addons = {};
+    for (const key in num.addons) addons[key] = { ...num.addons[key], ...txt.addons[key] };
+    return {
+      id,
+      label: txt.label,
+      title: txt.title,
+      days: txt.days,
+      base: num.base,
+      label2: txt.label2,
+      note: txt.note,
+      addons,
+      features: txt.features,
+    };
+  })
+);
 
 const activeTab = ref("landing");
 const addDev = ref(false);
 const extraPages = ref(0);
 const extraAnims = ref(0);
-const activeTier = computed(() => pricingTabs.find((tab) => tab.id === activeTab.value));
+const activeTier = computed(() => pricingTabs.value.find((tab) => tab.id === activeTab.value));
 const retainerTasks = ref(1);
 
 function selectTab(id) {
-  const tab = pricingTabs.find((t) => t.id === id);
+  const tab = pricingTabs.value.find((tb) => tb.id === id);
   activeTab.value = id;
   addDev.value = false;
   extraPages.value = 0;
@@ -451,7 +391,7 @@ const totalPrice = computed(() => {
   return total;
 });
 
-const euro = (value) => `€${value.toLocaleString("es-ES")}`;
+const euro = (value) => `€${value.toLocaleString(lang.value === "es" ? "es-ES" : "en-IE")}`;
 
 const categoryGridRef = ref(null);
 let categoryMagnetFrame = 0;
@@ -496,7 +436,7 @@ const mobileQuery = ref(null);
 let navFrame = 0;
 let revealObserver = null;
 
-const fragmentation = "INCONSISTENCY".split("");
+const fragmentation = computed(() => t.value.problem.keycapWord.split(""));
 const companyLogosAnimating = ref(false);
 let companyLogosAnimationTimer = null;
 
@@ -708,6 +648,9 @@ function setupRevealObserver() {
         : Number.parseFloat(target.style.getPropertyValue("--reveal-delay")) || 0;
     window.setTimeout(() => {
       target.classList.add("is-visible");
+      if (target.classList.contains("line-reveal")) {
+        window.setTimeout(() => target.classList.add("reveal-done"), 1000);
+      }
       const keycaps =
         target.matches?.(".keycaps")
           ? [target]
@@ -886,7 +829,7 @@ const vTilt = {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'lang-fading': langFading }">
     <aside class="sidebar" aria-label="Portfolio navigation">
       <div class="sidebar-top">
         <div class="brand-row">
@@ -913,7 +856,7 @@ const vTilt = {
         </nav>
 
         <div class="rail-group">
-          <p class="rail-group-label">Start project</p>
+          <p class="rail-group-label">{{ t.startProject }}</p>
           <a
             v-for="action in startActions"
             :key="action.label"
@@ -928,10 +871,16 @@ const vTilt = {
           </a>
         </div>
 
+        <div class="lang-toggle" :class="`lang-${lang}`" role="group" aria-label="Language">
+          <span class="lang-slider" aria-hidden="true"></span>
+          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-pressed="String(lang === 'es')" @click="setLang('es')">ES</button>
+          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-pressed="String(lang === 'en')" @click="setLang('en')">EN</button>
+        </div>
+
       </div>
 
       <div class="sidebar-bottom">
-        <p class="rail-label"><span class="rail-label-lighter">Trusted by</span> 8+ companies</p>
+        <p class="rail-label"><span class="rail-label-lighter">{{ t.trustedPre }}</span> {{ t.trustedCompanies }}</p>
         <div
           class="company-logo-grid"
           :class="{ 'is-animating': companyLogosAnimating }"
@@ -960,7 +909,7 @@ const vTilt = {
       <button
         class="mobile-menu-toggle"
         type="button"
-        :aria-label="mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'"
+        :aria-label="mobileMenuOpen ? t.aria.closeNav : t.aria.openNav"
         :aria-expanded="String(mobileMenuOpen)"
         aria-controls="mobile-menu"
         @click="setMobileMenuOpen(!mobileMenuOpen)"
@@ -972,7 +921,7 @@ const vTilt = {
     </header>
 
     <nav id="mobile-menu" class="mobile-menu" :class="{ 'is-open': mobileMenuOpen }" aria-label="Mobile navigation">
-      <div>
+      <div class="mobile-menu-panel">
         <a
           v-for="item in mobileNavItems"
           :key="item.id"
@@ -984,12 +933,17 @@ const vTilt = {
           <span>{{ item.label }}</span>
         </a>
         <a class="mobile-menu-contact" :href="bookCallHref" @click="openBook($event); setMobileMenuOpen(false)">
-          Book a call
+          {{ t.bookCall }}
         </a>
+        <div class="lang-toggle" :class="`lang-${lang}`" role="group" aria-label="Language">
+          <span class="lang-slider" aria-hidden="true"></span>
+          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-pressed="String(lang === 'es')" @click="setLang('es')">ES</button>
+          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-pressed="String(lang === 'en')" @click="setLang('en')">EN</button>
+        </div>
       </div>
 
       <div class="sidebar-bottom">
-        <p class="rail-label"><span class="rail-label-lighter">Trusted by</span> 8+ companies</p>
+        <p class="rail-label"><span class="rail-label-lighter">{{ t.trustedPre }}</span> {{ t.trustedCompanies }}</p>
         <div class="company-logo-grid">
           <img
             v-for="company in companies"
@@ -1007,19 +961,19 @@ const vTilt = {
         <!-- HERO -->
         <section class="hero section-observe" data-section="top">
           <div class="hero-inner">
-            <p class="hero-eyebrow">Premium design + code for growing businesses</p>
+            <p class="hero-eyebrow">{{ t.hero.eyebrow }}</p>
             <h1 class="hero-title">
-              The <img class="hero-inline-logo" :src="asset('terron-logo.png')" alt="" aria-hidden="true" /> studio
-              <span class="soft">for businesses ready to give their users</span> a premium experience.
+              {{ t.hero.titlePre }} <img class="hero-inline-logo" :src="asset('terron-logo.png')" alt="" aria-hidden="true" /> {{ t.hero.titleMid }}
+              <span class="soft">{{ t.hero.titleSoft }}</span> {{ t.hero.titlePost }}
             </h1>
             <div class="hero-actions">
               <a class="pill-button" :href="bookCallHref" @click="openBook($event)">
                 <span class="pill-icon meet" aria-hidden="true"></span>
-                Book a call
+                {{ t.bookCall }}
               </a>
               <a class="pill-button" href="#work" @click="handleAnchorClick">
                 <span class="pill-icon folder" aria-hidden="true"></span>
-                See projects
+                {{ t.seeProjects }}
               </a>
             </div>
           </div>
@@ -1042,47 +996,37 @@ const vTilt = {
 
         <!-- NARRATIVE: how we got here -->
         <section class="section narrative">
-          <p>We've built and shipped <b>our own real products</b>, start to finish.</p>
-          <p>So we know what a <i>premium experience</i> actually takes <span class="emoji">✨</span></p>
-          <p>Most businesses that want to step up hit the same wall… <span class="mark">“finding the right people to build it.”</span></p>
-          <p>One person for UI, another for branding, someone else for motion.<br />Explaining the vision again and again and again…</p>
-          <p>Somewhere along the way the experience stops feeling premium — and your users notice.</p>
+          <p v-for="(para, i) in t.narrative" :key="i" v-html="para"></p>
         </section>
 
         <!-- PROBLEM -->
         <section class="section problem-block">
-          <div class="section-heading"><h2>What's the real problem?</h2></div>
+          <div class="section-heading"><h2>{{ t.problem.heading }}</h2></div>
           <p class="keycap-line">
-            It's
-            <span class="keycaps" aria-label="Fragmentation">
+            {{ t.problem.keycapPre }}
+            <span class="keycaps" :aria-label="t.problem.keycapLabel">
               <span v-for="(ch, i) in fragmentation" :key="i" class="keycap" :style="{ '--k': i }">{{ ch }}</span>
             </span>
           </p>
           <ul class="problem-points">
             <li v-for="point in problemPoints" :key="point">{{ point }}</li>
           </ul>
-          <p class="problem-lead">
-            A premium experience can't be assembled from pieces.<br />
-            It has to feel like <span class="mark green">one thing.</span>
-          </p>
+          <p class="problem-lead" v-html="t.problem.leadHtml"></p>
         </section>
 
         <!-- SOLUTION + board -->
         <section id="work" class="section solution-block section-observe" data-section="work">
           <div class="section-heading">
-            <h2><span class="desk-only">What's the solution?</span><span class="mob-only">Why we exist</span></h2>
+            <h2><span class="desk-only">{{ t.solution.headingDesk }}</span><span class="mob-only">{{ t.solution.headingMob }}</span></h2>
           </div>
           <div class="solution-problem mob-only">
-            <p class="solution-problem-lead">Most brands hit the same wall: <span class="mark">fragmentation.</span></p>
+            <p class="solution-problem-lead" v-html="t.solution.probLeadHtml"></p>
             <ul class="solution-problem-points">
               <li v-for="point in problemPoints" :key="point">{{ point }}</li>
             </ul>
-            <p class="solution-problem-note">A premium experience can't be assembled from pieces — it has to feel like <span class="mark green">one thing.</span></p>
+            <p class="solution-problem-note" v-html="t.solution.probNoteHtml"></p>
           </div>
-          <p class="solution-lead">
-            That's why we built
-            <span class="brand-inline">Terron Studio</span>
-          </p>
+          <p class="solution-lead" v-html="t.solution.leadHtml"></p>
 
           <div class="board" aria-label="Selected work">
             <a
@@ -1101,21 +1045,13 @@ const vTilt = {
             </a>
           </div>
 
-          <p class="solution-motto">
-            <span class="soft">Not another agency.</span>
-            <span class="soft">Not a marketplace of freelancers…</span>
-            <br />
-            But <span class="mark green">one team that sees the whole picture.</span>
-          </p>
+          <p class="solution-motto" v-html="t.solution.mottoHtml"></p>
         </section>
 
         <!-- ABOUT -->
         <section id="our-work" class="section about-block section-observe" data-section="work">
-          <div class="section-heading"><h2>Our Work</h2></div>
-          <p class="work-lead">
-            Different products. Different audiences. Different energy.<br />
-            Always the <span class="mark green">same level of care.</span>
-          </p>
+          <div class="section-heading"><h2>{{ t.work.heading }}</h2></div>
+          <p class="work-lead" v-html="t.work.leadHtml"></p>
           <div class="hero-media compact work-media" aria-label="Selected work">
             <div class="carousel">
               <div
@@ -1134,10 +1070,10 @@ const vTilt = {
                   <img :src="asset(project.image)" :alt="project.alt" />
                 </a>
               </div>
-              <button class="carousel-arrow prev" type="button" aria-label="Previous" @click="workPrev">
+              <button class="carousel-arrow prev" type="button" :aria-label="t.aria.prev" @click="workPrev">
                 <span></span>
               </button>
-              <button class="carousel-arrow next" type="button" aria-label="Next" @click="workNext">
+              <button class="carousel-arrow next" type="button" :aria-label="t.aria.next" @click="workNext">
                 <span></span>
               </button>
               <div class="carousel-dots">
@@ -1147,7 +1083,7 @@ const vTilt = {
                   type="button"
                   class="carousel-dot"
                   :class="{ 'is-active': workSlide === index }"
-                  :aria-label="`Go to ${project.name}`"
+                  :aria-label="`${t.aria.goTo} ${project.name}`"
                   @click="workSlide = index"
                 ></button>
               </div>
@@ -1181,34 +1117,30 @@ const vTilt = {
 
         <!-- HOW IT WORKS -->
         <section id="how" class="section how-section section-observe" data-section="how">
-          <div class="section-heading"><h2>How it works</h2></div>
-          <p class="section-lead">
-            Simple from first hello to launch. <span class="hl">Three steps</span>, one team.
-          </p>
+          <div class="section-heading"><h2>{{ t.how.heading }}</h2></div>
+          <p class="section-lead" v-html="t.how.leadHtml"></p>
           <div class="how-steps">
             <!-- 1 · Book a call -->
             <article class="how-card how-card--book">
               <div class="how-visual">
                 <div class="how-mock">
                   <div class="how-mock-head">
-                    <span>15-min intro call</span>
+                    <span>{{ t.how.book.badge }}</span>
                     <span class="how-mock-clock" aria-hidden="true"></span>
                   </div>
-                  <div class="how-mock-time">Free · No commitment</div>
+                  <div class="how-mock-time">{{ t.how.book.time }}</div>
                   <ul class="how-mock-rows">
-                    <li>Quick fit check</li>
-                    <li>Scope &amp; timeline</li>
-                    <li>Next steps</li>
+                    <li v-for="(row, i) in t.how.book.rows" :key="i">{{ row }}</li>
                   </ul>
                   <a class="how-mock-cta" :href="bookCallHref" @click="openBook($event)">
                     <span class="pill-icon meet" aria-hidden="true"></span>
-                    Book a call
+                    {{ t.bookCall }}
                   </a>
                 </div>
               </div>
               <div class="how-body">
-                <h3>Book a call</h3>
-                <p>15 minutes. Tell us what you're building and where you want it to go.</p>
+                <h3>{{ t.how.book.title }}</h3>
+                <p>{{ t.how.book.body }}</p>
               </div>
             </article>
 
@@ -1227,8 +1159,8 @@ const vTilt = {
                 </span>
               </div>
               <div class="how-body">
-                <h3>We design &amp; build</h3>
-                <p>One team handles the whole thing end to end: design, branding and development. You see progress as we go.</p>
+                <h3>{{ t.how.build.title }}</h3>
+                <p>{{ t.how.build.body }}</p>
               </div>
             </article>
 
@@ -1242,8 +1174,8 @@ const vTilt = {
                 </div>
               </div>
               <div class="how-body">
-                <h3>Launch</h3>
-                <p>Your product ships feeling premium. We keep refining until it's right.</p>
+                <h3>{{ t.how.launch.title }}</h3>
+                <p>{{ t.how.launch.body }}</p>
               </div>
             </article>
           </div>
@@ -1251,19 +1183,13 @@ const vTilt = {
 
         <!-- TRANSITION -->
         <section class="section transition-section">
-          <p class="transition-note">
-            Okay, you've probably seen enough by now.<br />
-            The work makes sense. The approach feels familiar. The process isn't heavy.<br />
-            The next step doesn't need convincing — it just needs a <span class="mark green">decision.</span>
-          </p>
+          <p class="transition-note" v-html="t.transitionHtml"></p>
         </section>
 
         <!-- PRICING -->
         <section id="pricing" class="section pricing-section section-observe" data-section="pricing">
-          <div class="section-heading"><h2>Pricing</h2></div>
-          <p class="section-lead">
-            Choose between a <span class="hl">one-time plan</span> or a monthly retainer — whatever works for you.
-          </p>
+          <div class="section-heading"><h2>{{ t.pricing.heading }}</h2></div>
+          <p class="section-lead" v-html="t.pricing.leadHtml"></p>
 
           <div class="pricing-tabs" role="tablist" ref="tabsWrap">
             <span class="pricing-tab-indicator" :style="tabIndicatorStyle" aria-hidden="true"></span>
@@ -1317,9 +1243,9 @@ const vTilt = {
                 <span class="addon-stepper">
                   <span class="addon-price">+{{ euro(activeTier.addons.pages.price) }}{{ activeTier.addons.pages.unit }}</span>
                   <span class="stepper">
-                    <button type="button" @click="extraPages = Math.max(0, extraPages - 1)" aria-label="Less pages">–</button>
+                    <button type="button" @click="extraPages = Math.max(0, extraPages - 1)" :aria-label="t.aria.lessPages">–</button>
                     <b>{{ extraPages }}</b>
-                    <button type="button" @click="extraPages++" aria-label="More pages">+</button>
+                    <button type="button" @click="extraPages++" :aria-label="t.aria.morePages">+</button>
                   </span>
                 </span>
               </div>
@@ -1329,9 +1255,9 @@ const vTilt = {
                 <span class="addon-stepper">
                   <span class="addon-price">+{{ euro(activeTier.addons.anim.price) }}{{ activeTier.addons.anim.unit }}</span>
                   <span class="stepper">
-                    <button type="button" @click="extraAnims = Math.max(0, extraAnims - 1)" aria-label="Less animations">–</button>
+                    <button type="button" @click="extraAnims = Math.max(0, extraAnims - 1)" :aria-label="t.aria.lessAnims">–</button>
                     <b>{{ extraAnims }}</b>
-                    <button type="button" @click="extraAnims++" aria-label="More animations">+</button>
+                    <button type="button" @click="extraAnims++" :aria-label="t.aria.moreAnims">+</button>
                   </span>
                 </span>
               </div>
@@ -1350,11 +1276,11 @@ const vTilt = {
               </div>
               <a class="button primary" :href="`mailto:${email}`" @click="handleMessageClick()">
                 <span class="pill-icon send" aria-hidden="true"></span>
-                Send a message
+                {{ t.sendMessage }}
               </a>
               <a class="button secondary" :href="bookCallHref" @click="openBook($event)">
                 <span class="pill-icon meet" aria-hidden="true"></span>
-                Book a call
+                {{ t.bookCall }}
               </a>
             </div>
           </div>
@@ -1363,32 +1289,29 @@ const vTilt = {
 
           <div class="retainer-card">
             <div class="retainer-config">
-              <h3>Terron Retainer</h3>
+              <h3>{{ t.pricing.retainer.title }}</h3>
               <div class="addon-row">
-                <span class="addon-label">Active task</span>
+                <span class="addon-label">{{ t.pricing.retainer.activeTask }}</span>
                 <span class="stepper green">
-                  <button type="button" @click="decrementRetainerTasks()" aria-label="Less tasks">–</button>
+                  <button type="button" @click="decrementRetainerTasks()" :aria-label="t.aria.lessTasks">–</button>
                   <b>{{ retainerTasks }}</b>
-                  <button type="button" @click="incrementRetainerTasks()" aria-label="More tasks">+</button>
+                  <button type="button" @click="incrementRetainerTasks()" :aria-label="t.aria.moreTasks">+</button>
                 </span>
               </div>
               <ul class="pricing-features">
-                <li>All services included — design & development</li>
-                <li>Desktop, tablet & mobile responsive</li>
-                <li>Unlimited revisions, updates every 48h</li>
-                <li>Pause or cancel anytime</li>
+                <li v-for="(feature, i) in t.pricing.retainer.features" :key="i">{{ feature }}</li>
               </ul>
             </div>
             <div class="pricing-summary">
               <div class="price-card green" v-tilt>
                 <span class="price-card-glare" aria-hidden="true"></span>
                 <span class="price-card-brand">TERRON</span>
-                <span class="price-card-label">Monthly retainer</span>
-                <span class="price-card-value">{{ euro(3900 + (retainerTasks - 1) * 1500) }}<small>/mo</small></span>
+                <span class="price-card-label">{{ t.pricing.retainer.monthly }}</span>
+                <span class="price-card-value">{{ euro(2800 + (retainerTasks - 1) * 1500) }}<small>{{ t.pricing.retainer.perMo }}</small></span>
               </div>
               <a class="button primary" :href="bookCallHref" @click="openBook($event)">
                 <span class="pill-icon meet" aria-hidden="true"></span>
-                Book a call
+                {{ t.bookCall }}
               </a>
             </div>
           </div>
@@ -1396,10 +1319,10 @@ const vTilt = {
 
         <!-- WHO ARE WE -->
         <section id="studio" class="section studio-section section-observe" data-section="studio">
-          <div class="section-heading"><h2>Who we are</h2></div>
+          <div class="section-heading"><h2>{{ t.studio.heading }}</h2></div>
           <p class="studio-lead">
-            Terron Studio is led by <span class="lead-name"><img :src="asset('terron-pfp.webp')" alt="" aria-hidden="true" /> Gonzalo.</span><br />
-            Builder first, founder second.
+            {{ t.studio.leadPre }} <span class="lead-name"><img :src="asset('terron-pfp.webp')" alt="" aria-hidden="true" /> {{ t.studio.leadName }}</span><br />
+            {{ t.studio.leadPost }}
           </p>
           <div class="story-copy">
             <p v-for="paragraph in story" :key="paragraph">{{ paragraph }}</p>
@@ -1409,46 +1332,38 @@ const vTilt = {
         <!-- FINAL LETTER -->
         <section class="section final-cta">
           <div class="letter">
-            <p class="letter-label">And here's a personal note</p>
-            <p>Thanks for reading this far. Lastly, what I want to add is…</p>
-            <p>
-              Terron Studio is for businesses that care how their users perceive them — about how
-              <span class="mark green">good design</span> impacts conversion and customer experience.
-            </p>
-            <p>
-              If that's you, we'll make sure your product always feels premium. That's our promise.
-            </p>
-            <p>
-              Someday you'll look back at where your brand started, and you'll remember two things: the moment
-              it finally felt premium, and the team that helped you get there.
-            </p>
-            <p>You don't need ten tools. You don't need to overthink this.</p>
-            <p class="letter-final">You just need <span class="mark green">Terron Studio.</span></p>
+            <p class="letter-label">{{ t.letter.label }}</p>
+            <p>{{ t.letter.p1 }}</p>
+            <p v-html="t.letter.p2Html"></p>
+            <p>{{ t.letter.p3 }}</p>
+            <p>{{ t.letter.p4 }}</p>
+            <p>{{ t.letter.p5 }}</p>
+            <p class="letter-final" v-html="t.letter.finalHtml"></p>
           </div>
 
           <div class="letter-sign">
             <img class="sign-mark" :src="asset('signature.png')" alt="Gonzalo Terrón signature" />
             <div>
               <p class="sign-name">Gonzalo Rodríguez Terrón</p>
-              <p class="sign-role">Founder</p>
+              <p class="sign-role">{{ t.letter.role }}</p>
             </div>
           </div>
 
           <div class="hero-actions">
             <a class="pill-button" :href="bookCallHref" @click="openBook($event)">
               <span class="pill-icon meet" aria-hidden="true"></span>
-              Book a call
+              {{ t.bookCall }}
             </a>
             <a class="pill-button" href="#work" @click="handleAnchorClick">
               <span class="pill-icon folder" aria-hidden="true"></span>
-              See projects
+              {{ t.seeProjects }}
             </a>
           </div>
         </section>
 
         <!-- FAQ -->
         <section id="faq" class="section faq-section section-observe">
-          <h2 class="faq-title">Still have questions?</h2>
+          <h2 class="faq-title">{{ t.faq.title }}</h2>
           <ul class="faq-list">
             <li
               v-for="(item, i) in faqs"
@@ -1480,10 +1395,10 @@ const vTilt = {
       <div v-if="bookModalOpen" class="book-modal" @click.self="closeBook">
         <div class="book-modal-card">
           <div class="book-modal-bar">
-            <span class="book-modal-title">Book a call</span>
+            <span class="book-modal-title">{{ t.bookModalTitle }}</span>
             <button class="book-modal-close" type="button" aria-label="Close" @click="closeBook">×</button>
           </div>
-          <iframe :src="bookCallHref" title="Book a call with Terron Studio" loading="lazy"></iframe>
+          <iframe :src="bookCallHref" :title="t.iframeTitle" loading="lazy"></iframe>
         </div>
       </div>
     </transition>

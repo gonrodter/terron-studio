@@ -1815,6 +1815,13 @@ h1 span {
   --line-wipe: calc(100% + 1.5em);
 }
 
+/* once the wipe is done the mask is dropped, so hover motion inside the block
+   (e.g. the hero inline logo lifting up) is not clipped by the mask box */
+.scroll-reveal.line-reveal.reveal-done {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
 /* bold — soft fade in on its own beat */
 .narrative b.reveal-accent {
   opacity: 0;
@@ -3664,6 +3671,82 @@ h1 span {
 
 .rail-icon.accent svg {
   stroke: var(--blue);
+}
+
+.lang-toggle {
+  position: relative;
+  display: inline-flex;
+  align-self: start;
+  width: fit-content;
+  margin: 10px 0 0 18px;
+  padding: 3px;
+  border-radius: 999px;
+  background: #f0f2f5;
+  isolation: isolate;
+}
+
+.lang-slider {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 2);
+  z-index: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 22, 26, 0.12);
+  transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lang-toggle.lang-en .lang-slider {
+  transform: translateX(100%);
+}
+
+.lang-option {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 46px;
+  padding: 5px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #8a8f95;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+  cursor: pointer;
+  transition: color 260ms ease;
+}
+
+.lang-option:hover {
+  color: var(--ink);
+}
+
+.lang-option.is-active {
+  color: var(--ink);
+}
+
+/* premium crossfade while every string swaps language */
+.brand-row,
+.rail-nav,
+.rail-group,
+.sidebar-bottom,
+.main-panel,
+.mobile-menu-panel {
+  transition: opacity 240ms ease, transform 240ms ease, filter 240ms ease;
+}
+
+.lang-fading .brand-row,
+.lang-fading .rail-nav,
+.lang-fading .rail-group,
+.lang-fading .sidebar-bottom,
+.lang-fading .main-panel,
+.lang-fading .mobile-menu-panel {
+  opacity: 0;
+  transform: translateY(6px);
+  filter: blur(3px);
 }
 
 /* ── HERO ──────────────────────────────────────────────────── */
