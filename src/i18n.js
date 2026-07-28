@@ -66,6 +66,17 @@ export const messages = {
         "PowerPool website screenshot",
       ],
     },
+    projectsPage: {
+      title: "Projects",
+      back: "Back to projects",
+      visit: "Visit site",
+      tags: {
+        collecta: "Mobile App",
+        burntab: "macOS App",
+        "aparicio-alemany": "Website",
+        "ducati-w93": "Website",
+      },
+    },
     categories: ["Website", "Web App", "Mobile App", "Development", "App Store screenshots", "See all Projects"],
     how: {
       heading: "How it works",
@@ -235,6 +246,17 @@ export const messages = {
         "Captura de la web del concurso Ducati W93",
         "Captura de la web de PowerPool",
       ],
+    },
+    projectsPage: {
+      title: "Proyectos",
+      back: "Volver a proyectos",
+      visit: "Ver web",
+      tags: {
+        collecta: "App móvil",
+        burntab: "App de macOS",
+        "aparicio-alemany": "Página web",
+        "ducati-w93": "Página web",
+      },
     },
     categories: ["Página web", "Web App", "App móvil", "Desarrollo", "Capturas para App Store", "Ver todos los proyectos"],
     how: {

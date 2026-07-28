@@ -3866,13 +3866,13 @@ h1 span {
 
 /* hero media card */
 .hero-media {
-  width: min(1120px, 100%);
+  width: min(860px, 100%);
   margin: 46px auto 0;
 }
 
 .hero-media-frame {
   position: relative;
-  aspect-ratio: 16 / 8.4;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 24px;
@@ -3899,12 +3899,10 @@ h1 span {
 
 .hero-media-frame img {
   position: absolute;
-  inset: 8%;
-  width: 84%;
-  height: 84%;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 18px 40px rgba(66, 69, 74, 0.24);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   opacity: 0;
   transform: scale(1.02);
   transition: opacity 900ms ease, transform 1200ms ease;
@@ -3913,6 +3911,16 @@ h1 span {
 .hero-media-frame img.is-active {
   opacity: 1;
   transform: scale(1);
+}
+
+/* plain-named shots: whole image, just smaller */
+.hero-media-frame img.zoom {
+  object-fit: contain;
+  transform: scale(0.78);
+}
+
+.hero-media-frame img.zoom.is-active {
+  transform: scale(0.78);
 }
 
 .hero-media-glow {
@@ -5264,6 +5272,11 @@ h1 span {
     text-align: left;
   }
 
+  /* how it works: step 1 booking mock keeps its left-aligned layout */
+  .how-mock {
+    text-align: left;
+  }
+
   /* faq: title centers with the panel, Q&A stay left for readability */
   .faq-title {
     max-width: 100%;
@@ -5497,9 +5510,9 @@ h1 span {
 .carousel {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 16 / 6.6;
+  aspect-ratio: 2 / 1;
   border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 24px;
+  border-radius: 14px;
   background: linear-gradient(160deg, #8fd0ff 0%, #cfeeff 42%, #d6f2b6 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 24px 60px rgba(66, 69, 74, 0.18);
 }
@@ -5513,15 +5526,13 @@ h1 span {
 .carousel-slide {
   flex: 0 0 100%;
   height: 100%;
-  padding: 3.2%;
+  padding: 6%;
 }
 
 .carousel-slide img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgba(66, 69, 74, 0.22);
+  object-fit: contain;
 }
 
 .carousel-dots {
@@ -5908,6 +5919,11 @@ body.modal-open {
   display: block;
   width: 152px;
   height: auto;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.how-card--build .how-visual:hover .how-logo-tile img {
+  transform: scale(1.14);
 }
 
 /* infinite marquee of service pills, sliding behind the logo */
@@ -5998,6 +6014,7 @@ body.modal-open {
   object-fit: cover;
   object-position: top center;
   max-height: 300px;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .how-shot--1 {
@@ -6019,6 +6036,14 @@ body.modal-open {
   right: -4%;
   transform: rotate(8deg);
   z-index: 3;
+}
+
+.how-card--launch .how-visual:hover .how-shot--1 {
+  transform: rotate(-14deg) translate(-14px, -6px);
+}
+
+.how-card--launch .how-visual:hover .how-shot--3 {
+  transform: rotate(12deg) translate(14px, -6px);
 }
 
 @media (max-width: 900px) {
@@ -6207,5 +6232,290 @@ body.modal-open {
 
   .faq-section {
     padding-bottom: 36px;
+  }
+}
+
+/* ── /projects page ────────────────────────────────────────── */
+/* No panel card here — every project runs edge to edge. */
+.projects-content {
+  padding: 58px 20px 48px;
+}
+
+.projects-panel {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.pg-head {
+  margin: 0 0 42px;
+}
+
+.pg-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-weight: 820;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 46px;
+  container-type: inline-size;
+}
+
+.pg-card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pg-card:hover {
+  transform: translateY(-6px);
+}
+
+.pg-shot {
+  display: block;
+  overflow: hidden;
+  padding: 4px;
+  border-radius: calc(2.64cqw + 4px);
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(66, 69, 74, 0.08), 0 20px 44px rgba(66, 69, 74, 0.12);
+  transition: box-shadow 420ms ease;
+}
+
+.pg-card:hover .pg-shot {
+  box-shadow: 0 4px 12px rgba(66, 69, 74, 0.12), 0 32px 62px rgba(66, 69, 74, 0.18);
+}
+
+.pg-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2.64cqw;
+}
+
+.pg-caption {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 16px 6px 0;
+}
+
+.pg-name {
+  font-size: 17px;
+  font-weight: 760;
+}
+
+/* detail view */
+.pg-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 38px;
+}
+
+.pg-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(66, 69, 74, 0.12), 0 12px 24px rgba(66, 69, 74, 0.1);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 300ms ease;
+}
+
+.pg-back svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pg-back:hover {
+  box-shadow: 0 4px 10px rgba(66, 69, 74, 0.16), 0 18px 32px rgba(66, 69, 74, 0.16);
+}
+
+.pg-back:hover svg {
+  transform: translateX(-2px);
+}
+
+.pg-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pg-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 820;
+  line-height: 1.1;
+}
+
+.pg-subtitle {
+  color: var(--faint);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pg-visit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 680;
+  transition: color 240ms ease;
+}
+
+.pg-visit svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pg-visit:hover {
+  color: var(--ink);
+}
+
+.pg-visit:hover svg {
+  transform: translate(3px, -3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-visit svg {
+    transition: none;
+  }
+}
+
+/* Each export carries a wide transparent margin, so pull the stack together
+   with a negative offset that scales with the column width. */
+.pg-shots {
+  display: block;
+}
+
+.pg-shot-item + .pg-shot-item {
+  margin-top: -9%;
+}
+
+.pg-detail:not(.is-ducati) .pg-shot-item:nth-child(2) {
+  margin-top: 2px;
+}
+
+.pg-shot-item.is-tall {
+  margin-top: 6%;
+}
+
+.pg-shot-item {
+  margin: 0;
+}
+
+.pg-shot-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* full mobile-page capture: smaller than the rest, flush left, corners to match */
+.pg-shot-item.is-tall img {
+  width: auto;
+  max-width: min(460px, 100%);
+  margin: 0;
+  border-radius: 20px;
+}
+
+
+/* list ⇄ detail transition */
+.proj-swap-enter-active,
+.proj-swap-leave-active {
+  transition: opacity 320ms ease, transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms ease;
+}
+
+.proj-swap-enter-from {
+  opacity: 0;
+  transform: translateY(14px);
+  filter: blur(4px);
+}
+
+.proj-swap-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+  filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proj-swap-enter-active,
+  .proj-swap-leave-active {
+    transition-duration: 1ms;
+  }
+
+  .pg-card,
+  .pg-shot,
+  .pg-back,
+  .pg-back svg {
+    transition: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .projects-content {
+    padding: 18px 16px 32px;
+  }
+
+  .projects-panel {
+    width: 100%;
+  }
+
+  .pg-head {
+    margin-bottom: 28px;
+  }
+
+  .pg-head h1 {
+    font-size: 34px;
+  }
+
+  .pg-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+
+
+
+  .pg-detail-head {
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .pg-back {
+    width: 40px;
+    height: 40px;
+  }
+
+  .pg-title {
+    font-size: 21px;
+  }
+
+  .pg-visit {
+    font-size: 13px;
   }
 }

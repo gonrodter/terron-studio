@@ -33,6 +33,13 @@ watch(
   { immediate: true }
 );
 
+function syncDocTitle() {
+  const base = t.value.docTitle;
+  if (view.value !== "projects") document.title = base;
+  else if (activeProject.value) document.title = `${activeProject.value.name} — Terron Studio`;
+  else document.title = `${t.value.projectsPage.title} — Terron Studio`;
+}
+
 const posthogEnabled = Boolean(
   import.meta.env.VITE_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_POSTHOG_HOST
 );
@@ -61,10 +68,55 @@ const assetMap = {
   "tuparty-site.png": new URL("../assets/tuparty-site.png", import.meta.url).href,
   "ducati-site.png": new URL("../assets/ducati-site.png", import.meta.url).href,
   "studio-site.png": new URL("../assets/studio-site.png", import.meta.url).href,
+  "collecta-1.png": new URL("../assets/collecta-1.webp", import.meta.url).href,
+  "collecta-2.png": new URL("../assets/collecta-2.webp", import.meta.url).href,
+  "collecta-3.png": new URL("../assets/collecta-3.webp", import.meta.url).href,
+  "burntab-1.png": new URL("../assets/burntab-1.webp", import.meta.url).href,
+  "burntab-2.png": new URL("../assets/burntab-2.webp", import.meta.url).href,
+  "burntab-3.png": new URL("../assets/burntab-3.webp", import.meta.url).href,
+  "aparicio-1.png": new URL("../assets/aparicio-1.webp", import.meta.url).href,
+  "aparicio-2.png": new URL("../assets/aparicio-2.webp", import.meta.url).href,
+  "aparicio-3.png": new URL("../assets/aparicio-3.webp", import.meta.url).href,
+  "aparicio-4.png": new URL("../assets/aparicio-4.webp", import.meta.url).href,
+  "ducati-1.png": new URL("../assets/ducati-1.webp", import.meta.url).href,
+  "ducati-2.png": new URL("../assets/ducati-2.webp", import.meta.url).href,
+  "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
+  "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
+  "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
+  "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
   "happy-face.png": new URL("../assets/happy-face.png", import.meta.url).href,
 };
 
 const asset = (file) => assetMap[file];
+
+// List covers use margin-trimmed copies so they fill their frame.
+const coverMap = {
+  "collecta.png": new URL("../assets/trimmed/collecta.webp", import.meta.url).href,
+  "burntab.png": new URL("../assets/trimmed/burntab.webp", import.meta.url).href,
+  "aparicio.png": new URL("../assets/trimmed/aparicio.webp", import.meta.url).href,
+  "ducati.png": new URL("../assets/trimmed/ducati.webp", import.meta.url).href,
+};
+
+// Detail galleries use the exports as they are — same size, no crop, no upscale.
+const shotMap = {
+  "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
+  "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
+  "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
+  "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
+  "collecta-2.png": new URL("../assets/collecta-2.webp", import.meta.url).href,
+  "collecta-3.png": new URL("../assets/collecta-3.webp", import.meta.url).href,
+  "collecta-4.png": new URL("../assets/collecta-4.webp", import.meta.url).href,
+  "burntab-2.png": new URL("../assets/burntab-2.webp", import.meta.url).href,
+  "burntab-3.png": new URL("../assets/burntab-3.webp", import.meta.url).href,
+  "burntab-4.png": new URL("../assets/burntab-4.webp", import.meta.url).href,
+  "aparicio-2.png": new URL("../assets/aparicio-2.webp", import.meta.url).href,
+  "aparicio-3.png": new URL("../assets/aparicio-3.webp", import.meta.url).href,
+  "aparicio-4.png": new URL("../assets/aparicio-4.webp", import.meta.url).href,
+  "ducati-2.png": new URL("../assets/ducati-2.webp", import.meta.url).href,
+};
+
+const cover = (file) => coverMap[file];
+const shot = (file) => shotMap[file];
 
 const email = "rodriguez.terron.gonzalo@gmail.com";
 const phone = "+34 640 583 966";
@@ -106,7 +158,8 @@ function handleMessageClick() {
 
 function handleServiceCategoryClick(cat, event) {
   captureEvent("service_category_clicked", { category_label: cat.label });
-  if (cat.href) handleAnchorClick(event);
+  if (cat.toProjects) goProjects(event);
+  else if (cat.href) handleAnchorClick(event);
 }
 
 function toggleDevAddon() {
@@ -185,19 +238,131 @@ const companies = [
 ];
 
 const projectMeta = [
-  { name: "Collecta", href: "https://trycollecta.com/", image: "collecta-site.png" },
-  { name: "BurnTab", href: "https://burntab.com/", image: "burntab-site.png" },
-  { name: "Aparicio & Alemany", href: "https://aparicio-alemany-arquitectos.vercel.app/", image: "studio-site.png" },
-  { name: "Ducati W93", href: "https://www.ducatiweare93.com/", image: "ducati-site.png" },
-  { name: "PowerPool", href: "https://powerpool.io/", image: "powerpool-site.png" },
+  {
+    slug: "collecta",
+    cover: "collecta.png",
+    name: "Collecta",
+    href: "https://trycollecta.com/",
+    image: "collecta-1.png",
+    shots: ["collecta.png", "collecta-2.png", "collecta-3.png", "collecta-4.png"],
+  },
+  {
+    slug: "burntab",
+    cover: "burntab.png",
+    name: "BurnTab",
+    href: "https://burntab.com/",
+    image: "burntab-1.png",
+    shots: ["burntab.png", "burntab-2.png", "burntab-3.png", "burntab-4.png"],
+  },
+  {
+    slug: "aparicio-alemany",
+    cover: "aparicio.png",
+    name: "Aparicio & Alemany",
+    href: "https://aparicio-alemany-arquitectos.vercel.app/",
+    image: "aparicio-1.png",
+    shots: ["aparicio.png", "aparicio-2.png", "aparicio-3.png", "aparicio-4.png"],
+  },
+  {
+    slug: "ducati-w93",
+    cover: "ducati.png",
+    name: "Ducati W93",
+    href: "https://www.ducatiweare93.com/",
+    image: "ducati-1.png",
+    shots: ["ducati.png", { file: "ducati-2.png", tall: true }],
+  },
 ];
 
 const projects = computed(() =>
   projectMeta.map((p, i) => ({ ...p, alt: t.value.work.projectAlts[i] }))
 );
 
-const heroSlides = ["collecta-site.png", "burntab-site.png", "studio-site.png", "powerpool-site.png", "tuparty-site.png"];
+const projectPages = computed(() =>
+  projectMeta.map((p, i) => ({
+    ...p,
+    alt: t.value.work.projectAlts[i],
+    tag: t.value.projectsPage.tags[p.slug],
+    shots: p.shots.map((shot, si) =>
+      typeof shot === "string"
+        ? { file: shot, tall: false, alt: `${p.name} — ${si + 1}` }
+        : { ...shot, alt: `${p.name} — ${si + 1}` }
+    ),
+  }))
+);
+
+/* ── /projects routing (history API, no router dependency) ───── */
+const view = ref("home");
+const activeSlug = ref(null);
+const activeProject = computed(() =>
+  projectPages.value.find((p) => p.slug === activeSlug.value) ?? null
+);
+const projectsContentRef = ref(null);
+
+function readRoute() {
+  const parts = window.location.pathname.split("/").filter(Boolean);
+  if (parts[0] === "projects") {
+    view.value = "projects";
+    activeSlug.value = projectMeta.some((p) => p.slug === parts[1]) ? parts[1] : null;
+  } else {
+    view.value = "home";
+    activeSlug.value = null;
+  }
+}
+
+readRoute();
+
+function scrollViewTop() {
+  nextTick(() => {
+    window.scrollTo({ top: 0 });
+    projectsContentRef.value?.scrollTo({ top: 0 });
+  });
+}
+
+function navigate(path) {
+  if (window.location.pathname !== path) window.history.pushState({}, "", path);
+  readRoute();
+  scrollViewTop();
+}
+
+function goProjects(event) {
+  if (event) event.preventDefault();
+  captureEvent("projects_page_opened");
+  if (mobileMenuOpen.value) setMobileMenuOpen(false);
+  navigate("/projects");
+}
+
+function openProject(project) {
+  captureEvent("project_detail_opened", { project_name: project.name });
+  navigate(`/projects/${project.slug}`);
+}
+
+function closeProject() {
+  navigate("/projects");
+}
+
+function handlePopState() {
+  readRoute();
+  scrollViewTop();
+}
+
+watch([view, activeSlug, lang], () => {
+  syncDocTitle();
+});
+
+watch(view, (v) => {
+  if (v !== "home") return;
+  nextTick(() => {
+    setupRevealObserver();
+    requestActiveSectionUpdate();
+  });
+});
+
+const heroSlides = [
+  "aparicio-2.png", "collecta-3.png", "burntab.png", "ducati.png",
+  "aparicio-4.png", "collecta.png", "burntab-3.png", "aparicio.png",
+  "collecta-2.png", "burntab-2.png", "aparicio-3.png",
+];
 const heroSlide = ref(0);
+const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png"]);
 let heroTimer = null;
 
 function heroPrev() {
@@ -211,14 +376,30 @@ function heroNext() {
 const workSlide = ref(0);
 let workTimer = null;
 
+function workAdvance() {
+  const n = projects.value.length;
+  workSlide.value = (workSlide.value + 1) % n;
+}
+
+function restartWorkTimer() {
+  if (workTimer) window.clearInterval(workTimer);
+  workTimer = window.setInterval(workAdvance, 4600);
+}
+
 function workPrev() {
   const n = projects.value.length;
   workSlide.value = (workSlide.value - 1 + n) % n;
+  restartWorkTimer();
 }
 
 function workNext() {
-  const n = projects.value.length;
-  workSlide.value = (workSlide.value + 1) % n;
+  workAdvance();
+  restartWorkTimer();
+}
+
+function workGoTo(index) {
+  workSlide.value = index;
+  restartWorkTimer();
 }
 
 const strokeIcon = (d) =>
@@ -231,7 +412,8 @@ const categoryMeta = [
   { svg: strokeIcon('<path d="M8.5 8.5 5 12l3.5 3.5"/><path d="M15.5 8.5 19 12l-3.5 3.5"/><path d="M13.5 6l-3 12"/>') },
   { svg: `<span class="brand-clip"><img class="brand-img" src="${asset("app-store-logo.png")}" alt="" /></span>` },
   {
-    href: "#work",
+    href: "/projects",
+    toProjects: true,
     featured: true,
     svg: '<svg viewBox="0 0 24 24"><defs><linearGradient id="mf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8cc5f6"/><stop offset="1" stop-color="#3f8fe6"/></linearGradient></defs><path fill="#a6d1f8" d="M3 7.2A2 2 0 0 1 5 5.2h4.1a2 2 0 0 1 1.42.6l1.06 1.06a2 2 0 0 0 1.42.59H19a2 2 0 0 1 2 2v2.05H3z"/><path fill="url(#mf)" d="M3 9.4a1.6 1.6 0 0 1 1.6-1.6h14.8A1.6 1.6 0 0 1 21 9.4v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
   },
@@ -242,10 +424,10 @@ const categories = computed(() =>
 );
 
 const boardMeta = [
-  { image: "collecta-site.png", pin: "red", rotate: -4 },
-  { image: "burntab-site.png", pin: "green", rotate: 3 },
-  { image: "studio-site.png", pin: "tape", rotate: -3 },
-  { image: "ducati-site.png", pin: "clip", rotate: 1.5 },
+  { image: "collecta.png", pin: "red", rotate: -4 },
+  { image: "burntab.png", pin: "green", rotate: 3 },
+  { image: "aparicio.png", pin: "tape", rotate: -3 },
+  { image: "ducati.png", pin: "clip", rotate: 1.5 },
 ];
 
 const board = computed(() =>
@@ -496,6 +678,19 @@ function handleAnchorClick(event) {
 
   if (mobileMenuOpen.value) {
     setMobileMenuOpen(false);
+  }
+
+  if (view.value !== "home" && href && href.startsWith("#")) {
+    event.preventDefault();
+    navigate("/");
+    if (href === "#top") return;
+    nextTick(() => {
+      const dest = document.querySelector(href);
+      if (!dest) return;
+      if (isMobile.value) window.scrollTo({ top: dest.getBoundingClientRect().top + window.scrollY - 12 });
+      else contentRef.value?.scrollTo({ top: dest.offsetTop - 24 });
+    });
+    return;
   }
 
   if (href === "#top") {
@@ -760,13 +955,15 @@ onMounted(async () => {
   window.addEventListener("scroll", requestActiveSectionUpdate, { passive: true });
   window.addEventListener("resize", requestActiveSectionUpdate);
   window.addEventListener("keydown", handleKeydown);
+  window.addEventListener("popstate", handlePopState);
 
   heroTimer = window.setInterval(() => {
     heroSlide.value = (heroSlide.value + 1) % heroSlides.length;
   }, 3200);
 
-  workTimer = window.setInterval(workNext, 4600);
+  workTimer = window.setInterval(workAdvance, 4600);
 
+  syncDocTitle();
   setupRevealObserver();
   setActiveSection();
   updateTabIndicator();
@@ -779,6 +976,7 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", requestActiveSectionUpdate);
   window.removeEventListener("resize", updateTabIndicator);
   window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("popstate", handlePopState);
   mobileQuery.value?.removeEventListener("change", handleMediaChange);
   revealObserver?.disconnect();
   if (companyLogosAnimationTimer) window.clearTimeout(companyLogosAnimationTimer);
@@ -843,7 +1041,7 @@ const vTilt = {
             v-for="item in navItems"
             :key="item.id"
             class="rail-link"
-            :class="{ 'is-active': activeSection === item.id }"
+            :class="{ 'is-active': view === 'home' && activeSection === item.id }"
             :href="item.href"
             @click="handleAnchorClick"
           >
@@ -925,7 +1123,7 @@ const vTilt = {
           v-for="item in mobileNavItems"
           :key="item.id"
           class="mobile-menu-link"
-          :class="{ 'is-active': activeSection === item.id }"
+          :class="{ 'is-active': view === 'home' && activeSection === item.id }"
           :href="item.href"
           @click="handleAnchorClick"
         >
@@ -956,7 +1154,7 @@ const vTilt = {
       </div>
     </nav>
 
-    <main id="top" ref="contentRef" class="content">
+    <main id="top" ref="contentRef" class="content" v-show="view === 'home'">
       <div class="main-panel">
         <!-- HERO -->
         <section class="hero section-observe" data-section="top">
@@ -971,7 +1169,7 @@ const vTilt = {
                 <span class="pill-icon meet" aria-hidden="true"></span>
                 {{ t.bookCall }}
               </a>
-              <a class="pill-button" href="#work" @click="handleAnchorClick">
+              <a class="pill-button" href="/projects" @click="goProjects">
                 <span class="pill-icon folder" aria-hidden="true"></span>
                 {{ t.seeProjects }}
               </a>
@@ -983,13 +1181,12 @@ const vTilt = {
               <img
                 v-for="(slide, index) in heroSlides"
                 :key="slide"
-                :class="{ 'is-active': heroSlide === index }"
+                :class="{ 'is-active': heroSlide === index, 'zoom': heroZoomShots.has(slide) }"
                 :src="asset(slide)"
                 alt=""
                 aria-hidden="true"
               />
               <div class="hero-media-glow"></div>
-              <span class="hero-media-brand">TERRON STUDIO</span>
             </div>
           </div>
         </section>
@@ -1067,7 +1264,7 @@ const vTilt = {
                   rel="noreferrer"
                   @click="handleProjectLinkClick(project)"
                 >
-                  <img :src="asset(project.image)" :alt="project.alt" />
+                  <img :src="asset(project.cover)" :alt="project.alt" />
                 </a>
               </div>
               <button class="carousel-arrow prev" type="button" :aria-label="t.aria.prev" @click="workPrev">
@@ -1084,7 +1281,7 @@ const vTilt = {
                   class="carousel-dot"
                   :class="{ 'is-active': workSlide === index }"
                   :aria-label="`${t.aria.goTo} ${project.name}`"
-                  @click="workSlide = index"
+                  @click="workGoTo(index)"
                 ></button>
               </div>
             </div>
@@ -1168,9 +1365,9 @@ const vTilt = {
             <article class="how-card how-card--launch">
               <div class="how-visual">
                 <div class="how-stack" aria-hidden="true">
-                  <img class="how-shot how-shot--1" :src="asset('burntab-site.png')" alt="" />
-                  <img class="how-shot how-shot--2" :src="asset('collecta-site.png')" alt="" />
-                  <img class="how-shot how-shot--3" :src="asset('studio-site.png')" alt="" />
+                  <img class="how-shot how-shot--1" :src="asset('burntab.png')" alt="" />
+                  <img class="how-shot how-shot--2" :src="asset('collecta.png')" alt="" />
+                  <img class="how-shot how-shot--3" :src="asset('ducati.png')" alt="" />
                 </div>
               </div>
               <div class="how-body">
@@ -1354,7 +1551,7 @@ const vTilt = {
               <span class="pill-icon meet" aria-hidden="true"></span>
               {{ t.bookCall }}
             </a>
-            <a class="pill-button" href="#work" @click="handleAnchorClick">
+            <a class="pill-button" href="/projects" @click="goProjects">
               <span class="pill-icon folder" aria-hidden="true"></span>
               {{ t.seeProjects }}
             </a>
@@ -1388,6 +1585,79 @@ const vTilt = {
             </li>
           </ul>
         </section>
+      </div>
+    </main>
+
+    <main v-if="view === 'projects'" ref="projectsContentRef" class="content projects-content">
+      <div class="projects-panel">
+        <transition name="proj-swap" mode="out-in">
+          <!-- LIST -->
+          <div v-if="!activeProject" key="list" class="pg-list">
+            <header class="pg-head">
+              <h1>{{ t.projectsPage.title }}</h1>
+            </header>
+
+            <div class="pg-grid">
+              <button
+                v-for="project in projectPages"
+                :key="project.slug"
+                type="button"
+                class="pg-card"
+                @click="openProject(project)"
+              >
+                <span class="pg-shot">
+                  <img :src="cover(project.cover)" :alt="project.alt" loading="lazy" />
+                </span>
+                <span class="pg-caption">
+                  <span class="pg-name">{{ project.name }}</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- DETAIL -->
+          <div v-else :key="activeProject.slug" class="pg-detail" :class="{ 'is-ducati': activeProject.slug === 'ducati-w93' }">
+            <header class="pg-detail-head">
+              <button
+                type="button"
+                class="pg-back"
+                :aria-label="t.projectsPage.back"
+                @click="closeProject"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <span class="pg-title-wrap">
+                <span class="pg-title">{{ activeProject.name }}</span>
+                <span class="pg-subtitle">{{ activeProject.tag }}</span>
+              </span>
+              <a
+                class="pg-visit"
+                :href="activeProject.href"
+                target="_blank"
+                rel="noreferrer"
+                @click="handleProjectLinkClick(activeProject)"
+              >
+                {{ t.projectsPage.visit }}
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M8 16 16 8M9.5 8H16v6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+            </header>
+
+            <div class="pg-shots">
+              <figure
+                v-for="item in activeProject.shots"
+                :key="item.file"
+                class="pg-shot-item"
+                :class="{ 'is-tall': item.tall }"
+              >
+                <img :src="shot(item.file)" :alt="item.alt" loading="lazy" />
+              </figure>
+            </div>
+          </div>
+        </transition>
       </div>
     </main>
 
