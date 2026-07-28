@@ -2451,11 +2451,19 @@ h1 span {
 
   .mobile-menu-contact {
     justify-content: center;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 22px;
     border-color: rgba(255, 255, 255, 0.72);
     background: #f0f2f5;
     box-shadow: var(--shadow);
     color: var(--blue-ink);
+  }
+
+  .mobile-lang {
+    display: flex;
+    align-self: center;
+    width: fit-content;
+    margin: 0 auto 18px;
   }
 
   .mobile-social-links {
@@ -3700,6 +3708,10 @@ h1 span {
 
 .lang-toggle.lang-en .lang-slider {
   transform: translateX(100%);
+}
+
+.desktop-lang {
+  margin: 0 0 14px 18px;
 }
 
 .lang-option {

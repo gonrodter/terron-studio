@@ -871,15 +871,14 @@ const vTilt = {
           </a>
         </div>
 
-        <div class="lang-toggle" :class="`lang-${lang}`" role="group" aria-label="Language">
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="lang-toggle desktop-lang" :class="`lang-${lang}`" role="group" aria-label="Language">
           <span class="lang-slider" aria-hidden="true"></span>
           <button type="button" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-pressed="String(lang === 'es')" @click="setLang('es')">ES</button>
           <button type="button" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-pressed="String(lang === 'en')" @click="setLang('en')">EN</button>
         </div>
-
-      </div>
-
-      <div class="sidebar-bottom">
         <p class="rail-label"><span class="rail-label-lighter">{{ t.trustedPre }}</span> {{ t.trustedCompanies }}</p>
         <div
           class="company-logo-grid"
@@ -933,16 +932,17 @@ const vTilt = {
           <span>{{ item.label }}</span>
         </a>
         <a class="mobile-menu-contact" :href="bookCallHref" @click="openBook($event); setMobileMenuOpen(false)">
+          <span class="pill-icon meet" aria-hidden="true"></span>
           {{ t.bookCall }}
         </a>
-        <div class="lang-toggle" :class="`lang-${lang}`" role="group" aria-label="Language">
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="lang-toggle mobile-lang" :class="`lang-${lang}`" role="group" aria-label="Language">
           <span class="lang-slider" aria-hidden="true"></span>
           <button type="button" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-pressed="String(lang === 'es')" @click="setLang('es')">ES</button>
           <button type="button" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-pressed="String(lang === 'en')" @click="setLang('en')">EN</button>
         </div>
-      </div>
-
-      <div class="sidebar-bottom">
         <p class="rail-label"><span class="rail-label-lighter">{{ t.trustedPre }}</span> {{ t.trustedCompanies }}</p>
         <div class="company-logo-grid">
           <img
