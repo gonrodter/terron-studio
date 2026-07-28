@@ -1436,14 +1436,14 @@ const vTilt = {
               </button>
 
               <div v-if="activeTier.addons.pages" class="addon-row">
-                <span class="addon-label">{{ activeTier.addons.pages.label }}</span>
-                <span class="addon-stepper">
+                <span class="addon-label">
+                  {{ activeTier.addons.pages.label }}
                   <span class="addon-price">+{{ euro(activeTier.addons.pages.price) }}{{ activeTier.addons.pages.unit }}</span>
-                  <span class="stepper">
-                    <button type="button" @click="extraPages = Math.max(0, extraPages - 1)" :aria-label="t.aria.lessPages">–</button>
-                    <b>{{ extraPages }}</b>
-                    <button type="button" @click="extraPages++" :aria-label="t.aria.morePages">+</button>
-                  </span>
+                </span>
+                <span class="stepper">
+                  <button type="button" @click="extraPages = Math.max(0, extraPages - 1)" :aria-label="t.aria.lessPages">–</button>
+                  <b>{{ extraPages }}</b>
+                  <button type="button" @click="extraPages++" :aria-label="t.aria.morePages">+</button>
                 </span>
               </div>
 
