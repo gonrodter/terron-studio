@@ -118,11 +118,22 @@ const shotMap = {
 const cover = (file) => coverMap[file];
 const shot = (file) => shotMap[file];
 
-const email = "rodriguez.terron.gonzalo@gmail.com";
+const email = "info@terron-studio.com";
 const phone = "+34 640 583 966";
 const bookCallHref = "https://cal.eu/terron-studio/15min";
 
 const bookModalOpen = ref(false);
+const contactModalOpen = ref(false);
+const contactSending = ref(false);
+const contactStatus = ref("");
+const contactDraft = ref({
+  name: "",
+  replyTo: "",
+  subject: "",
+  message: "",
+  website: "",
+  context: "general",
+});
 
 function openBook(event) {
   if (event) event.preventDefault();
@@ -133,7 +144,94 @@ function openBook(event) {
 
 function closeBook() {
   bookModalOpen.value = false;
-  document.body.classList.remove("modal-open");
+  if (!contactModalOpen.value) document.body.classList.remove("modal-open");
+}
+
+function contactTemplate(context = "general") {
+  if (context !== "pricing") {
+    return {
+      subject: t.value.contact.generalSubject,
+      message: t.value.contact.generalMessage,
+      context: "general",
+    };
+  }
+
+  const tier = activeTier.value;
+  const details = [`${t.value.contact.service}: ${tier.label}`];
+
+  if (tier.retainerOnly) details.push(`${t.value.contact.activeTasks}: ${retainerTasks.value}`);
+  if (addDev.value) details.push(`${t.value.contact.development}: ${t.value.contact.yes}`);
+  if (activeTab.value === "screenshots") {
+    details.push(
+      extraPages.value
+        ? `${t.value.contact.extraUnits}: ${extraPages.value}`
+        : t.value.contact.noExtraScreenshots
+    );
+  } else if (extraPages.value) {
+    details.push(`${t.value.contact.extraUnits}: ${extraPages.value}`);
+  }
+  if (extraAnims.value) details.push(`${t.value.contact.animations}: ${extraAnims.value}`);
+  if (activeTab.value === "landing") {
+    details.push(
+      `${t.value.pricing.bookingSystem.title}: ${bookingAddonOpen.value
+        ? t.value.contact.yes
+        : t.value.contact.no}`
+    );
+  }
+
+  return {
+    subject: t.value.contact.pricingSubjects[activeTab.value],
+    message: `${t.value.contact.greeting}\n\n${t.value.contact.pricingIntro}\n\n${details
+      .map((detail) => `• ${detail}`)
+      .join("\n")}\n\n${t.value.contact.pricingClosing}\n`,
+    context: `pricing:${activeTab.value}`,
+  };
+}
+
+function openContact(event, context = "general") {
+  event?.preventDefault();
+  const template = contactTemplate(context);
+  contactDraft.value = {
+    name: contactDraft.value.name,
+    replyTo: contactDraft.value.replyTo,
+    website: "",
+    ...template,
+  };
+  contactStatus.value = "";
+  contactModalOpen.value = true;
+  document.body.classList.add("modal-open");
+  captureEvent("message_composer_opened", { context: template.context });
+}
+
+function closeContact() {
+  if (contactSending.value) return;
+  contactModalOpen.value = false;
+  contactStatus.value = "";
+  if (!bookModalOpen.value) document.body.classList.remove("modal-open");
+}
+
+async function sendContactMessage() {
+  if (contactSending.value) return;
+  contactSending.value = true;
+  contactStatus.value = "";
+
+  try {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contactDraft.value),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(t.value.contact.error);
+
+    contactStatus.value = "sent";
+    captureEvent("message_sent", { context: contactDraft.value.context });
+  } catch (error) {
+    contactStatus.value = error.message || t.value.contact.error;
+    captureEvent("message_send_failed", { context: contactDraft.value.context });
+  } finally {
+    contactSending.value = false;
+  }
 }
 
 const serviceRows = computed(() => t.value.how.serviceRows);
@@ -152,10 +250,6 @@ function handleProjectLinkClick(project) {
   captureEvent("project_link_clicked", { project_name: project.name });
 }
 
-function handleMessageClick() {
-  captureEvent("message_clicked");
-}
-
 function handleServiceCategoryClick(cat, event) {
   captureEvent("service_category_clicked", { category_label: cat.label });
   if (cat.toProjects) goProjects(event);
@@ -165,6 +259,26 @@ function handleServiceCategoryClick(cat, event) {
 function toggleDevAddon() {
   addDev.value = !addDev.value;
   captureEvent("dev_addon_toggled", { enabled: addDev.value });
+}
+
+async function toggleBookingAddon() {
+  const opened = !bookingAddonOpen.value;
+  bookingAddonOpen.value = opened;
+  captureEvent("booking_addon_toggled", { opened });
+
+  if (opened && isMobile.value) {
+    await nextTick();
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+    });
+    const addon = bookingAddonRef.value;
+    const header = document.querySelector(".mobile-header");
+    if (addon) {
+      const headerBottom = header?.getBoundingClientRect().bottom || 66;
+      const targetTop = window.scrollY + addon.getBoundingClientRect().top - headerBottom - 8;
+      window.scrollTo({ top: targetTop, behavior: "smooth" });
+    }
+  }
 }
 
 function decrementRetainerTasks() {
@@ -225,7 +339,7 @@ const mobileNavItems = computed(() =>
 
 const startActions = computed(() => [
   { label: t.value.bookCall, href: bookCallHref, modal: true, pillIcon: "meet" },
-  { label: t.value.sendMessage, href: `mailto:${email}`, pillIcon: "send" },
+  { label: t.value.sendMessage, href: "#contact", contact: true, pillIcon: "send" },
 ]);
 
 const companies = [
@@ -281,6 +395,7 @@ const projectPages = computed(() =>
     ...p,
     alt: t.value.work.projectAlts[i],
     tag: t.value.projectsPage.tags[p.slug],
+    brief: t.value.projectsPage.brief,
     shots: p.shots.map((shot, si) =>
       typeof shot === "string"
         ? { file: shot, tall: false, alt: `${p.name} — ${si + 1}` }
@@ -459,7 +574,7 @@ const services = [
 const story = computed(() => t.value.studio.story);
 
 const pricingNums = {
-  landing: { base: 1200, addons: { dev: { price: 850 }, pages: { price: 250 } } },
+  landing: { base: 399, addons: {} },
   webapp: { retainerOnly: true },
   mobile: { retainerOnly: true },
   screenshots: { base: 550, addons: { pages: { price: 90 } } },
@@ -493,11 +608,14 @@ const extraPages = ref(0);
 const extraAnims = ref(0);
 const activeTier = computed(() => pricingTabs.value.find((tab) => tab.id === activeTab.value));
 const retainerTasks = ref(1);
+const bookingAddonOpen = ref(false);
+const bookingAddonRef = ref(null);
 
 function selectTab(id) {
   const tab = pricingTabs.value.find((tb) => tb.id === id);
   activeTab.value = id;
   addDev.value = false;
+  bookingAddonOpen.value = false;
   extraPages.value = 0;
   extraAnims.value = 0;
   captureEvent("pricing_tab_selected", { tab_id: id, tab_label: tab?.label });
@@ -573,7 +691,7 @@ const totalPrice = computed(() => {
   return total;
 });
 
-const euro = (value) => `€${value.toLocaleString(lang.value === "es" ? "es-ES" : "en-IE")}`;
+const euro = (value) => `${value.toLocaleString(lang.value === "es" ? "es-ES" : "en-IE")} €`;
 
 const categoryGridRef = ref(null);
 let categoryMagnetFrame = 0;
@@ -725,6 +843,7 @@ function handleKeydown(event) {
   if (event.key === "Escape") {
     setMobileMenuOpen(false);
     closeBook();
+    closeContact();
   }
 }
 
@@ -1060,7 +1179,7 @@ const vTilt = {
             :key="action.label"
             class="rail-action"
             :href="action.href"
-            @click="action.modal ? openBook($event) : handleMessageClick()"
+            @click="action.modal ? openBook($event) : openContact($event)"
           >
             <span class="rail-icon accent" aria-hidden="true">
               <span class="pill-icon" :class="action.pillIcon"></span>
@@ -1416,7 +1535,7 @@ const vTilt = {
             <div class="pricing-config">
               <div class="pricing-config-head">
                 <h3>{{ activeTier.title }}</h3>
-                <span class="pricing-days"><span class="clock" aria-hidden="true"></span>{{ activeTier.days }}</span>
+                <span class="pricing-days pricing-days--mobile"><span class="clock" aria-hidden="true"></span>{{ activeTier.days }}</span>
               </div>
 
               <p v-if="activeTier.note" class="pricing-note">{{ activeTier.note }}</p>
@@ -1462,16 +1581,54 @@ const vTilt = {
               <ul class="pricing-features">
                 <li v-for="feature in activeTier.features" :key="feature">{{ feature }}</li>
               </ul>
+
+              <div v-if="activeTab === 'landing'" ref="bookingAddonRef" class="booking-addon-inline">
+                <button
+                  type="button"
+                  class="addon-toggle booking-addon-trigger"
+                  :class="{ 'is-on': bookingAddonOpen }"
+                  :aria-expanded="String(bookingAddonOpen)"
+                  @click="toggleBookingAddon()"
+                >
+                  <span class="addon-label">
+                    <span class="desk-only">{{ t.pricing.bookingSystem.question }}</span>
+                    <span class="mob-only">{{ t.pricing.bookingSystem.questionShort }}</span>
+                  </span>
+                  <span class="switch" :class="{ 'is-on': bookingAddonOpen }" aria-hidden="true"><i></i></span>
+                </button>
+
+                <transition name="tab-fade">
+                  <div v-if="bookingAddonOpen" class="booking-addon-details">
+                    <span class="booking-addon-details-title">{{ t.pricing.bookingSystem.setup }}</span>
+                    <span class="addon-price">{{ euro(100) }} · {{ t.pricing.bookingSystem.oneTime }}</span>
+                    <ul class="pricing-features">
+                      <li v-for="feature in t.pricing.bookingSystem.features" :key="feature">{{ feature }}</li>
+                    </ul>
+                  </div>
+                </transition>
+              </div>
             </div>
 
             <div class="pricing-summary">
+              <span class="pricing-days pricing-days--desktop"><span class="clock" aria-hidden="true"></span>{{ activeTier.days }}</span>
               <div class="price-card" v-tilt>
                 <span class="price-card-glare" aria-hidden="true"></span>
                 <span class="price-card-brand">TERRON</span>
                 <span class="price-card-label">{{ activeTier.label2 }}</span>
                 <span class="price-card-value">{{ euro(totalPrice) }}</span>
               </div>
-              <a class="button primary" :href="`mailto:${email}`" @click="handleMessageClick()">
+              <div v-if="bookingAddonOpen && activeTab === 'landing'" class="price-card green booking-price-card" v-tilt>
+                <span class="price-card-glare" aria-hidden="true"></span>
+                <span class="price-card-brand">EXTRAS</span>
+                <span class="price-card-label">{{ t.pricing.bookingSystem.title }}</span>
+                <div class="booking-price-lines">
+                  <span><strong>{{ euro(100) }}</strong>{{ t.pricing.bookingSystem.oneTime }}</span>
+                  <span><strong>{{ euro(29) }}</strong>{{ t.pricing.bookingSystem.perMo }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="pricing-actions">
+              <a class="button primary" href="#contact" @click="openContact($event, 'pricing')">
                 <span class="pill-icon send" aria-hidden="true"></span>
                 {{ t.sendMessage }}
               </a>
@@ -1484,7 +1641,7 @@ const vTilt = {
           </transition>
           </div>
 
-          <div class="retainer-card">
+          <div v-if="activeTier.retainerOnly" class="retainer-card">
             <div class="retainer-config">
               <h3>{{ t.pricing.retainer.title }}</h3>
               <div class="addon-row">
@@ -1506,12 +1663,19 @@ const vTilt = {
                 <span class="price-card-label">{{ t.pricing.retainer.monthly }}</span>
                 <span class="price-card-value">{{ euro(2800 + (retainerTasks - 1) * 1500) }}<small>{{ t.pricing.retainer.perMo }}</small></span>
               </div>
-              <a class="button primary" :href="bookCallHref" @click="openBook($event)">
+            </div>
+            <div class="pricing-actions">
+              <a class="button primary" href="#contact" @click="openContact($event, 'pricing')">
+                <span class="pill-icon send" aria-hidden="true"></span>
+                {{ t.sendMessage }}
+              </a>
+              <a class="button secondary" :href="bookCallHref" @click="openBook($event)">
                 <span class="pill-icon meet" aria-hidden="true"></span>
                 {{ t.bookCall }}
               </a>
             </div>
           </div>
+
         </section>
 
         <!-- WHO ARE WE -->
@@ -1646,6 +1810,14 @@ const vTilt = {
               </a>
             </header>
 
+            <blockquote class="pg-brief">
+              <p>
+                {{ activeProject.brief.start }}
+                <em>{{ activeProject.brief.emphasis }}</em>
+                {{ activeProject.brief.end }}
+              </p>
+            </blockquote>
+
             <div class="pg-shots">
               <figure
                 v-for="item in activeProject.shots"
@@ -1670,6 +1842,58 @@ const vTilt = {
           </div>
           <iframe :src="bookCallHref" :title="t.iframeTitle" loading="lazy"></iframe>
         </div>
+      </div>
+    </transition>
+
+    <transition name="contact-compose">
+      <div v-if="contactModalOpen" class="contact-modal" @click.self="closeContact">
+        <form class="contact-composer" :aria-label="t.contact.title" @submit.prevent="sendContactMessage">
+          <div class="contact-composer-bar">
+            <span>{{ t.contact.title }}</span>
+            <button type="button" :aria-label="t.contact.close" @click="closeContact">×</button>
+          </div>
+
+          <div v-if="contactStatus === 'sent'" class="contact-success" role="status">
+            <span class="contact-success-icon" aria-hidden="true">✓</span>
+            <h2>{{ t.contact.sentTitle }}</h2>
+            <p>{{ t.contact.sentBody }}</p>
+            <button class="button primary" type="button" @click="closeContact">{{ t.contact.done }}</button>
+          </div>
+
+          <template v-else>
+            <div class="contact-field contact-recipient">
+              <span>{{ t.contact.to }}</span>
+              <strong>Terron Studio &lt;{{ email }}&gt;</strong>
+            </div>
+            <label class="contact-field">
+              <span>{{ t.contact.from }}</span>
+              <input v-model.trim="contactDraft.name" type="text" :placeholder="t.contact.namePlaceholder" maxlength="100" autocomplete="name" required />
+            </label>
+            <label class="contact-field">
+              <span>{{ t.contact.replyTo }}</span>
+              <input v-model.trim="contactDraft.replyTo" type="email" :placeholder="t.contact.emailPlaceholder" maxlength="254" autocomplete="email" required />
+            </label>
+            <label class="contact-field contact-subject">
+              <span>{{ t.contact.subject }}</span>
+              <input v-model.trim="contactDraft.subject" type="text" maxlength="160" required />
+            </label>
+            <label class="contact-honeypot" aria-hidden="true">
+              Website
+              <input v-model="contactDraft.website" type="text" tabindex="-1" autocomplete="off" />
+            </label>
+            <textarea v-model="contactDraft.message" class="contact-message" :aria-label="t.contact.message" maxlength="5000" required></textarea>
+            <div class="contact-composer-footer">
+              <button class="contact-send" type="submit" :disabled="contactSending">
+                <span v-if="contactSending" class="contact-spinner" aria-hidden="true"></span>
+                {{ contactSending ? t.contact.sending : t.contact.send }}
+              </button>
+              <p v-if="contactStatus" class="contact-error" role="alert">{{ contactStatus }}</p>
+              <button class="contact-discard" type="button" :aria-label="t.contact.discard" @click="closeContact">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5" /></svg>
+              </button>
+            </div>
+          </template>
+        </form>
       </div>
     </transition>
   </div>

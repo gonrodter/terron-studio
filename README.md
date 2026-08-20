@@ -33,3 +33,19 @@ project. Configure the same variables in the production hosting provider:
 VITE_POSTHOG_PROJECT_TOKEN=phc_your_project_token
 VITE_POSTHOG_HOST=https://eu.i.posthog.com
 ```
+
+## Contact form
+
+The contact composer posts to the Vercel serverless route at `api/contact.js`,
+which sends email through Resend. Add these server-side environment variables to
+the deployment (do not prefix them with `VITE_`):
+
+```sh
+RESEND_API_KEY=re_your_api_key
+CONTACT_FROM_EMAIL="Terron Studio <web@your-verified-domain.com>"
+CONTACT_TO_EMAIL=info@terron-studio.com
+```
+
+`CONTACT_FROM_EMAIL` must use a domain verified in Resend. Use `vercel dev` when
+testing the serverless route locally; the regular Vite dev command only serves
+the frontend.
