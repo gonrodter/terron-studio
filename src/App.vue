@@ -353,22 +353,6 @@ const companies = [
 
 const projectMeta = [
   {
-    slug: "collecta",
-    cover: "collecta.png",
-    name: "Collecta",
-    href: "https://trycollecta.com/",
-    image: "collecta-1.png",
-    shots: ["collecta.png", "collecta-2.png", "collecta-3.png", "collecta-4.png"],
-  },
-  {
-    slug: "burntab",
-    cover: "burntab.png",
-    name: "BurnTab",
-    href: "https://burntab.com/",
-    image: "burntab-1.png",
-    shots: ["burntab.png", "burntab-2.png", "burntab-3.png", "burntab-4.png"],
-  },
-  {
     slug: "aparicio-alemany",
     cover: "aparicio.png",
     name: "Aparicio & Alemany",
@@ -384,6 +368,22 @@ const projectMeta = [
     image: "ducati-1.png",
     shots: ["ducati.png", { file: "ducati-2.png", tall: true }],
   },
+  {
+    slug: "collecta",
+    cover: "collecta.png",
+    name: "Collecta",
+    href: "https://trycollecta.com/",
+    image: "collecta-1.png",
+    shots: ["collecta.png", "collecta-2.png", "collecta-3.png", "collecta-4.png"],
+  },
+  {
+    slug: "burntab",
+    cover: "burntab.png",
+    name: "BurnTab",
+    href: "https://burntab.com/",
+    image: "burntab-1.png",
+    shots: ["burntab.png", "burntab-2.png", "burntab-3.png", "burntab-4.png"],
+  },
 ];
 
 const projects = computed(() =>
@@ -395,7 +395,7 @@ const projectPages = computed(() =>
     ...p,
     alt: t.value.work.projectAlts[i],
     tag: t.value.projectsPage.tags[p.slug],
-    brief: t.value.projectsPage.brief,
+    brief: t.value.projectsPage.briefs[p.slug],
     shots: p.shots.map((shot, si) =>
       typeof shot === "string"
         ? { file: shot, tall: false, alt: `${p.name} — ${si + 1}` }
@@ -469,6 +469,21 @@ watch(view, (v) => {
     setupRevealObserver();
     requestActiveSectionUpdate();
   });
+});
+
+watch([view, activeSlug], () => {
+  if (view.value !== "projects") {
+    projectsListObserver?.disconnect();
+    projectShotsObserver?.disconnect();
+    return;
+  }
+  if (activeSlug.value) {
+    projectsListObserver?.disconnect();
+    nextTick(() => setupProjectShotsReveal());
+    return;
+  }
+  projectShotsObserver?.disconnect();
+  nextTick(() => setupProjectsListReveal());
 });
 
 const heroSlides = [
@@ -735,6 +750,8 @@ const contentRef = ref(null);
 const mobileQuery = ref(null);
 let navFrame = 0;
 let revealObserver = null;
+let projectsListObserver = null;
+let projectShotsObserver = null;
 
 const fragmentation = computed(() => t.value.problem.keycapWord.split(""));
 const companyLogosAnimating = ref(false);
@@ -1064,6 +1081,85 @@ function setupRevealObserver() {
   targets.forEach((target) => revealObserver.observe(target));
 }
 
+function setupProjectsListReveal(listRoot = document.querySelector(".pg-list")) {
+  projectsListObserver?.disconnect();
+  if (!listRoot) return;
+
+  const heading = listRoot.querySelector(".pg-head h1");
+  const cards = Array.from(listRoot.querySelectorAll(".pg-card"));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  heading?.classList.add("pg-list-reveal");
+  cards.forEach((card) => card.classList.add("pg-list-reveal"));
+
+  if (reduceMotion) {
+    heading?.classList.add("is-visible");
+    cards.forEach((card) => card.classList.add("is-visible"));
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => heading?.classList.add("is-visible"));
+  });
+
+  projectsListObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        window.setTimeout(() => entry.target.classList.add("is-visible"), 180);
+        projectsListObserver?.unobserve(entry.target);
+      });
+    },
+    {
+      root: isMobile.value ? null : projectsContentRef.value,
+      rootMargin: "0px 0px -8% 0px",
+      threshold: 0.12,
+    }
+  );
+
+  cards.forEach((card) => projectsListObserver.observe(card));
+}
+
+function handleProjectPanelBeforeEnter(element) {
+  if (element.classList.contains("pg-list")) {
+    window.requestAnimationFrame(() => setupProjectsListReveal(element));
+  } else if (element.classList.contains("pg-detail")) {
+    window.requestAnimationFrame(() => setupProjectShotsReveal(element));
+  }
+}
+
+function setupProjectShotsReveal(detailRoot = document.querySelector(".pg-detail")) {
+  projectShotsObserver?.disconnect();
+  if (!detailRoot) return;
+
+  const shots = Array.from(detailRoot.querySelectorAll(".pg-shot-item"));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduceMotion) {
+    shots.forEach((shotItem) => shotItem.classList.add("is-visible"));
+    return;
+  }
+
+  projectShotsObserver = new IntersectionObserver(
+    (entries) => {
+      entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        .forEach((entry, index) => {
+          window.setTimeout(() => entry.target.classList.add("is-visible"), index * 90);
+          projectShotsObserver?.unobserve(entry.target);
+        });
+    },
+    {
+      root: isMobile.value ? null : projectsContentRef.value,
+      rootMargin: "0px 0px -10% 0px",
+      threshold: 0.1,
+    }
+  );
+
+  shots.forEach((shotItem) => projectShotsObserver.observe(shotItem));
+}
+
 onMounted(async () => {
   await nextTick();
   mobileQuery.value = window.matchMedia("(max-width: 820px)");
@@ -1084,6 +1180,8 @@ onMounted(async () => {
 
   syncDocTitle();
   setupRevealObserver();
+  if (view.value === "projects" && !activeSlug.value) setupProjectsListReveal();
+  if (view.value === "projects" && activeSlug.value) setupProjectShotsReveal();
   setActiveSection();
   updateTabIndicator();
   window.addEventListener("resize", updateTabIndicator);
@@ -1098,6 +1196,8 @@ onBeforeUnmount(() => {
   window.removeEventListener("popstate", handlePopState);
   mobileQuery.value?.removeEventListener("change", handleMediaChange);
   revealObserver?.disconnect();
+  projectsListObserver?.disconnect();
+  projectShotsObserver?.disconnect();
   if (companyLogosAnimationTimer) window.clearTimeout(companyLogosAnimationTimer);
   if (heroTimer) window.clearInterval(heroTimer);
   if (workTimer) window.clearInterval(workTimer);
@@ -1754,11 +1854,11 @@ const vTilt = {
 
     <main v-if="view === 'projects'" ref="projectsContentRef" class="content projects-content">
       <div class="projects-panel">
-        <transition name="proj-swap" mode="out-in">
+        <transition name="proj-swap" mode="out-in" @before-enter="handleProjectPanelBeforeEnter">
           <!-- LIST -->
           <div v-if="!activeProject" key="list" class="pg-list">
             <header class="pg-head">
-              <h1>{{ t.projectsPage.title }}</h1>
+              <h1 class="pg-list-reveal">{{ t.projectsPage.title }}</h1>
             </header>
 
             <div class="pg-grid">
@@ -1766,7 +1866,7 @@ const vTilt = {
                 v-for="project in projectPages"
                 :key="project.slug"
                 type="button"
-                class="pg-card"
+                class="pg-card pg-list-reveal"
                 @click="openProject(project)"
               >
                 <span class="pg-shot">
@@ -1815,6 +1915,7 @@ const vTilt = {
                 {{ activeProject.brief.start }}
                 <em>{{ activeProject.brief.emphasis }}</em>
                 {{ activeProject.brief.end }}
+                <span v-if="activeProject.brief.brand" class="pg-brief-brand">{{ activeProject.brief.brand }}</span>
               </p>
             </blockquote>
 
@@ -1822,10 +1923,10 @@ const vTilt = {
               <figure
                 v-for="item in activeProject.shots"
                 :key="item.file"
-                class="pg-shot-item"
+                class="pg-shot-item pg-shot-reveal"
                 :class="{ 'is-tall': item.tall }"
               >
-                <img :src="shot(item.file)" :alt="item.alt" loading="lazy" />
+                <img :src="shot(item.file)" :alt="item.alt" loading="eager" />
               </figure>
             </div>
           </div>
@@ -1854,10 +1955,12 @@ const vTilt = {
           </div>
 
           <div v-if="contactStatus === 'sent'" class="contact-success" role="status">
-            <span class="contact-success-icon" aria-hidden="true">✓</span>
+            <svg class="contact-success-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m5 12.5 4.25 4.25L19 7" />
+            </svg>
             <h2>{{ t.contact.sentTitle }}</h2>
             <p>{{ t.contact.sentBody }}</p>
-            <button class="button primary" type="button" @click="closeContact">{{ t.contact.done }}</button>
+            <button class="button primary contact-success-button" type="button" @click="closeContact">{{ t.contact.done }}</button>
           </div>
 
           <template v-else>

@@ -46,6 +46,6 @@ CONTACT_FROM_EMAIL="Terron Studio <web@your-verified-domain.com>"
 CONTACT_TO_EMAIL=info@terron-studio.com
 ```
 
-`CONTACT_FROM_EMAIL` must use a domain verified in Resend. Use `vercel dev` when
-testing the serverless route locally; the regular Vite dev command only serves
-the frontend.
+`CONTACT_FROM_EMAIL` must use a domain verified in Resend. The Vite development
+server exposes the same `/api/contact` handler locally, so `npm run dev` can be
+used to test the complete contact flow.

@@ -59,10 +59,10 @@ export const messages = {
       heading: "Our Work",
       leadHtml: 'Different products. Different audiences. Different energy.<br />Always the <span class="mark green">same level of care.</span>',
       projectAlts: [
-        "Collecta website screenshot",
-        "BurnTab website screenshot",
         "Aparicio & Alemany architecture studio website screenshot",
         "Ducati W93 contest website screenshot",
+        "Collecta website screenshot",
+        "BurnTab website screenshot",
         "PowerPool website screenshot",
       ],
     },
@@ -70,10 +70,29 @@ export const messages = {
       title: "Projects",
       back: "Back to projects",
       visit: "Visit site",
-      brief: {
-        start: "The client was looking for an experience that felt",
-        emphasis: "simple, thoughtful",
-        end: "and entirely their own.",
+      briefs: {
+        collecta: {
+          start: "A project of",
+          emphasis: "our own making,",
+          end: "conceived, designed and built from start to finish at",
+          brand: "Terron Studio.",
+        },
+        burntab: {
+          start: "A project of",
+          emphasis: "our own making,",
+          end: "conceived, designed and built from start to finish at",
+          brand: "Terron Studio.",
+        },
+        "aparicio-alemany": {
+          start: "We wanted a clean, organised and thoughtful website that would serve as",
+          emphasis: "a showcase for our projects",
+          end: "and present what we can do in a unique, uncommon way.",
+        },
+        "ducati-w93": {
+          start: "We needed a landing page for a giveaway,",
+          emphasis: "with no scrolling and every step clear at first glance,",
+          end: "worthy of Ducati, We Are 93 and Marc Márquez.",
+        },
       },
       tags: {
         collecta: "Mobile App",
@@ -280,10 +299,10 @@ export const messages = {
       heading: "Nuestro trabajo",
       leadHtml: 'Distintos productos. Distintos públicos. Distinta energía.<br />Siempre el <span class="mark green">mismo mimo.</span>',
       projectAlts: [
-        "Captura de la web de Collecta",
-        "Captura de la web de BurnTab",
         "Captura de la web del estudio de arquitectura Aparicio & Alemany",
         "Captura de la web del concurso Ducati W93",
+        "Captura de la web de Collecta",
+        "Captura de la web de BurnTab",
         "Captura de la web de PowerPool",
       ],
     },
@@ -291,10 +310,29 @@ export const messages = {
       title: "Proyectos",
       back: "Volver a proyectos",
       visit: "Ver web",
-      brief: {
-        start: "El cliente buscaba una experiencia que se sintiera",
-        emphasis: "simple, cuidada",
-        end: "y completamente suya.",
+      briefs: {
+        collecta: {
+          start: "Un proyecto de",
+          emphasis: "nuestra propia cosecha,",
+          end: "pensado, diseñado y construido de principio a fin en",
+          brand: "Terron Studio.",
+        },
+        burntab: {
+          start: "Un proyecto de",
+          emphasis: "nuestra propia cosecha,",
+          end: "pensado, diseñado y construido de principio a fin en",
+          brand: "Terron Studio.",
+        },
+        "aparicio-alemany": {
+          start: "Queríamos una web limpia, ordenada y cuidada que funcionase como",
+          emphasis: "escaparate de nuestros proyectos",
+          end: "y mostrase lo que sabemos hacer de una forma única y poco común.",
+        },
+        "ducati-w93": {
+          start: "Necesitábamos una landing para un sorteo,",
+          emphasis: "sin scroll y con todos los pasos claros a primera vista,",
+          end: "a la altura de Ducati, We Are 93 y Marc Márquez.",
+        },
       },
       tags: {
         collecta: "App móvil",
