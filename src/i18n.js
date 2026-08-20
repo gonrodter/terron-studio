@@ -148,7 +148,7 @@ export const messages = {
         landing: {
           label: "Landing Page",
           title: "Website",
-          days: "< 2 days",
+          days: "2–5 days",
           label2: "Design & development from",
           addons: { dev: { label: "Add Development" }, pages: { label: "Extra Pages", unit: "/page" } },
           features: [
@@ -378,7 +378,7 @@ export const messages = {
         landing: {
           label: "Página web",
           title: "Página web",
-          days: "< 2 días",
+          days: "2–5 días",
           label2: "Diseño y desarrollo desde",
           addons: { dev: { label: "Añadir desarrollo" }, pages: { label: "Páginas extra", unit: "/página" } },
           features: [
