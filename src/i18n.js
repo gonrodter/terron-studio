@@ -25,7 +25,7 @@ export const messages = {
       titlePre: "The",
       titleMid: "studio",
       titleSoft: "for businesses ready to give their users",
-      titlePost: "a premium experience.",
+      titlePost: "a premium experience",
     },
     narrative: [
       "We've built and shipped <b>our own real products</b>, start to finish.",
@@ -246,7 +246,7 @@ export const messages = {
       titlePre: "El",
       titleMid: "estudio",
       titleSoft: "para los negocios que quieren dar a sus usuarios",
-      titlePost: "una experiencia premium.",
+      titlePost: "una experiencia premium",
     },
     narrative: [
       "Hemos creado y lanzado <b>nuestros propios productos</b>, de principio a fin.",
