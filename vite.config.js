@@ -1,6 +1,9 @@
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import contactHandler from "./api/contact.js";
+import { PRERENDER_ROUTES } from "./src/seo.js";
+
+const prerenderedPaths = new Set(PRERENDER_ROUTES);
 
 function contactApiPlugin() {
   return {
@@ -46,6 +49,16 @@ function contactApiPlugin() {
             response.end(JSON.stringify({ error: "Invalid request" }));
           }
         }
+      });
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use((request, _response, next) => {
+        const requestUrl = new URL(request.url, "http://localhost");
+        const pathname = requestUrl.pathname.replace(/\/$/, "") || "/";
+        if (prerenderedPaths.has(pathname)) {
+          request.url = `${pathname}/index.html${requestUrl.search}`;
+        }
+        next();
       });
     },
   };

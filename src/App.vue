@@ -1,20 +1,36 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import posthog from "posthog-js";
+import { captureEvent } from "./analytics.js";
 import { lang, messages } from "./i18n";
+import { getLocalizedPath, getRouteSeo, SITE_ORIGIN, SUPPORTED_LOCALES } from "./seo.js";
+
+const props = defineProps({
+  initialPath: {
+    type: String,
+    default: "/",
+  },
+});
 
 const t = computed(() => messages[lang.value]);
 
 const langFading = ref(false);
 let langFadeTimer = null;
 
-function setLang(l) {
+function currentPathForLocale(locale) {
+  const pathname = typeof window === "undefined" ? props.initialPath : window.location.pathname;
+  return getLocalizedPath(pathname, locale);
+}
+
+function setLang(l, event) {
+  event?.preventDefault();
   if (lang.value === l || langFading.value) return;
+  const targetPath = currentPathForLocale(l);
   captureEvent("language_changed", { language: l });
   langFading.value = true;
   if (langFadeTimer) clearTimeout(langFadeTimer);
   langFadeTimer = setTimeout(() => {
     lang.value = l;
+    if (typeof window !== "undefined") navigate(targetPath, false);
     nextTick(() => {
       langFadeTimer = setTimeout(() => {
         langFading.value = false;
@@ -27,47 +43,59 @@ function setLang(l) {
 watch(
   lang,
   (l) => {
-    document.documentElement.lang = l;
-    document.title = messages[l].docTitle;
+    if (typeof document !== "undefined") document.documentElement.lang = l;
   },
   { immediate: true }
 );
 
-function syncDocTitle() {
-  const base = t.value.docTitle;
-  if (view.value !== "projects") document.title = base;
-  else if (activeProject.value) document.title = `${activeProject.value.name} — Terron Studio`;
-  else document.title = `${t.value.projectsPage.title} — Terron Studio`;
+function setHeadMeta(selector, attribute, value) {
+  const element = document.head.querySelector(selector);
+  if (element) element.setAttribute(attribute, value);
 }
 
-const posthogEnabled = Boolean(
-  import.meta.env.VITE_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_POSTHOG_HOST
-);
-const captureEvent = (eventName, properties) => {
-  if (posthogEnabled) posthog.capture(eventName, properties);
-};
+function syncSeoMeta() {
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+  const project = activeProject.value;
+  const seo = getRouteSeo(window.location.pathname, lang.value);
+  const canonicalUrl = new URL(seo.canonicalPath, SITE_ORIGIN).href;
+  const projectImagePath = project
+    ? new URL(asset(project.image), window.location.origin).pathname
+    : null;
+  const image = project ? new URL(projectImagePath, SITE_ORIGIN).href : `${SITE_ORIGIN}/og.png`;
+
+  document.documentElement.lang = lang.value;
+  document.title = seo.title;
+  setHeadMeta('meta[name="description"]', "content", seo.description);
+  setHeadMeta('link[rel="canonical"]', "href", canonicalUrl);
+  setHeadMeta('link[rel="alternate"][hreflang="es"]', "href", new URL(seo.alternates.es, SITE_ORIGIN).href);
+  setHeadMeta('link[rel="alternate"][hreflang="en"]', "href", new URL(seo.alternates.en, SITE_ORIGIN).href);
+  setHeadMeta('link[rel="alternate"][hreflang="x-default"]', "href", new URL(seo.alternates.xDefault, SITE_ORIGIN).href);
+  setHeadMeta('meta[property="og:title"]', "content", seo.title);
+  setHeadMeta('meta[property="og:description"]', "content", seo.description);
+  setHeadMeta('meta[property="og:url"]', "content", canonicalUrl);
+  setHeadMeta('meta[property="og:locale"]', "content", lang.value === "es" ? "es_ES" : "en_US");
+  setHeadMeta('meta[property="og:locale:alternate"]', "content", lang.value === "es" ? "en_US" : "es_ES");
+  setHeadMeta('meta[property="og:image"]', "content", image);
+  setHeadMeta('meta[property="og:image:alt"]', "content", project ? project.alt : seo.imageAlt);
+  setHeadMeta('meta[property="og:image:type"]', "content", project ? "image/webp" : "image/png");
+  setHeadMeta('meta[property="og:image:width"]', "content", project ? "1920" : "1200");
+  setHeadMeta('meta[property="og:image:height"]', "content", project ? "1536" : "630");
+  setHeadMeta('meta[name="twitter:title"]', "content", seo.title);
+  setHeadMeta('meta[name="twitter:description"]', "content", seo.description);
+  setHeadMeta('meta[name="twitter:image"]', "content", image);
+  setHeadMeta('meta[name="twitter:image:alt"]', "content", project ? project.alt : seo.imageAlt);
+}
 
 const assetMap = {
-  "terron-logo.png": new URL("../assets/terron-logo.png", import.meta.url).href,
+  "terron-logo.png": new URL("../assets/responsive/terron-logo-320.webp", import.meta.url).href,
   "signature.png": new URL("../assets/signature.png", import.meta.url).href,
   "terron-pfp.webp": new URL("../assets/terron-pfp.webp", import.meta.url).href,
-  "app-store-logo.png": new URL("../assets/app-store-logo.png", import.meta.url).href,
-  "vertical-logo.png": new URL("../assets/vertical-logo.png", import.meta.url).href,
-  "konecta-logo.jpeg": new URL("../assets/konecta-logo.jpeg", import.meta.url).href,
-  "sngular-logo.webp": new URL("../assets/sngular-logo.webp", import.meta.url).href,
-  "tuparty-logo.png": new URL("../assets/tuparty-logo.png", import.meta.url).href,
-  "powerpool-logo.webp": new URL("../assets/powerpool-logo.webp", import.meta.url).href,
-  "collecta-logo.webp": new URL("../assets/collecta-logo.webp", import.meta.url).href,
-  "burntab-logo.png": new URL("../assets/burntab-logo.png", import.meta.url).href,
-  "ducati-logo.png": new URL("../assets/ducati-logo.png", import.meta.url).href,
-  "bbva-logo.webp": new URL("../assets/bbva-logo.webp", import.meta.url).href,
-  "cambridge-logo.png": new URL("../assets/cambridge-logo.png", import.meta.url).href,
-  "collecta-site.png": new URL("../assets/collecta-site.png", import.meta.url).href,
-  "burntab-site.png": new URL("../assets/burntab-site.png", import.meta.url).href,
-  "powerpool-site.png": new URL("../assets/powerpool-site.png", import.meta.url).href,
-  "tuparty-site.png": new URL("../assets/tuparty-site.png", import.meta.url).href,
-  "ducati-site.png": new URL("../assets/ducati-site.png", import.meta.url).href,
-  "studio-site.png": new URL("../assets/studio-site.png", import.meta.url).href,
+  "vertical-logo.png": new URL("../assets/optimized-logos/vertical-logo.webp", import.meta.url).href,
+  "konecta-logo.jpeg": new URL("../assets/optimized-logos/konecta-logo.webp", import.meta.url).href,
+  "sngular-logo.webp": new URL("../assets/optimized-logos/sngular-logo.webp", import.meta.url).href,
+  "powerpool-logo.webp": new URL("../assets/optimized-logos/powerpool-logo.webp", import.meta.url).href,
+  "collecta-logo.webp": new URL("../assets/optimized-logos/collecta-logo.webp", import.meta.url).href,
+  "ducati-logo.png": new URL("../assets/optimized-logos/ducati-logo.webp", import.meta.url).href,
   "collecta-1.png": new URL("../assets/collecta-1.webp", import.meta.url).href,
   "collecta-2.png": new URL("../assets/collecta-2.webp", import.meta.url).href,
   "collecta-3.png": new URL("../assets/collecta-3.webp", import.meta.url).href,
@@ -79,15 +107,49 @@ const assetMap = {
   "aparicio-3.png": new URL("../assets/aparicio-3.webp", import.meta.url).href,
   "aparicio-4.png": new URL("../assets/aparicio-4.webp", import.meta.url).href,
   "ducati-1.png": new URL("../assets/ducati-1.webp", import.meta.url).href,
-  "ducati-2.png": new URL("../assets/ducati-2.webp", import.meta.url).href,
   "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
   "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
-  "happy-face.png": new URL("../assets/happy-face.png", import.meta.url).href,
 };
 
 const asset = (file) => assetMap[file];
+
+const imageSizeMap = {
+  "terron-logo.png": { width: 320, height: 132 },
+  "signature.png": { width: 899, height: 928 },
+  "terron-pfp.webp": { width: 256, height: 256 },
+  "vertical-logo.png": { width: 192, height: 27 },
+  "konecta-logo.jpeg": { width: 192, height: 192 },
+  "sngular-logo.webp": { width: 192, height: 192 },
+  "powerpool-logo.webp": { width: 192, height: 192 },
+  "collecta-logo.webp": { width: 192, height: 192 },
+  "ducati-logo.png": { width: 181, height: 192 },
+  "collecta.png": { width: 1920, height: 957 },
+  "burntab.png": { width: 1920, height: 966 },
+  "aparicio.png": { width: 1920, height: 961 },
+  "ducati.png": { width: 1920, height: 972 },
+  "collecta-2.png": { width: 1920, height: 1536 },
+  "collecta-3.png": { width: 1920, height: 1536 },
+  "collecta-4.png": { width: 1920, height: 1536 },
+  "burntab-2.png": { width: 1920, height: 1536 },
+  "burntab-3.png": { width: 1920, height: 1536 },
+  "burntab-4.png": { width: 1920, height: 1536 },
+  "aparicio-2.png": { width: 1920, height: 1536 },
+  "aparicio-3.png": { width: 1920, height: 1536 },
+  "aparicio-4.png": { width: 1920, height: 1536 },
+  "ducati-2.png": { width: 742, height: 2432 },
+};
+
+const coverSizeMap = {
+  "collecta.png": { width: 1440, height: 720 },
+  "burntab.png": { width: 1440, height: 721 },
+  "aparicio.png": { width: 1440, height: 725 },
+  "ducati.png": { width: 1440, height: 723 },
+};
+
+const imageSize = (file) => imageSizeMap[file];
+const coverSize = (file) => coverSizeMap[file];
 
 // List covers use margin-trimmed copies so they fill their frame.
 const coverMap = {
@@ -158,33 +220,18 @@ function contactTemplate(context = "general") {
 
   const tier = activeTier.value;
   const details = [`${t.value.contact.service}: ${tier.label}`];
-
-  if (tier.retainerOnly) details.push(`${t.value.contact.activeTasks}: ${retainerTasks.value}`);
-  if (addDev.value) details.push(`${t.value.contact.development}: ${t.value.contact.yes}`);
-  if (activeTab.value === "screenshots") {
-    details.push(
-      extraPages.value
-        ? `${t.value.contact.extraUnits}: ${extraPages.value}`
-        : t.value.contact.noExtraScreenshots
-    );
-  } else if (extraPages.value) {
-    details.push(`${t.value.contact.extraUnits}: ${extraPages.value}`);
-  }
-  if (extraAnims.value) details.push(`${t.value.contact.animations}: ${extraAnims.value}`);
-  if (activeTab.value === "landing") {
-    details.push(
-      `${t.value.pricing.bookingSystem.title}: ${bookingAddonOpen.value
-        ? t.value.contact.yes
-        : t.value.contact.no}`
-    );
-  }
+  details.push(
+    `${t.value.pricing.bookingSystem.title}: ${bookingAddonOpen.value
+      ? t.value.contact.yes
+      : t.value.contact.no}`
+  );
 
   return {
-    subject: t.value.contact.pricingSubjects[activeTab.value],
+    subject: t.value.contact.pricingSubjects.landing,
     message: `${t.value.contact.greeting}\n\n${t.value.contact.pricingIntro}\n\n${details
       .map((detail) => `• ${detail}`)
       .join("\n")}\n\n${t.value.contact.pricingClosing}\n`,
-    context: `pricing:${activeTab.value}`,
+    context: "pricing:website",
   };
 }
 
@@ -256,11 +303,6 @@ function handleServiceCategoryClick(cat, event) {
   else if (cat.href) handleAnchorClick(event);
 }
 
-function toggleDevAddon() {
-  addDev.value = !addDev.value;
-  captureEvent("dev_addon_toggled", { enabled: addDev.value });
-}
-
 async function toggleBookingAddon() {
   const opened = !bookingAddonOpen.value;
   bookingAddonOpen.value = opened;
@@ -279,17 +321,6 @@ async function toggleBookingAddon() {
       window.scrollTo({ top: targetTop, behavior: "smooth" });
     }
   }
-}
-
-function decrementRetainerTasks() {
-  if (retainerTasks.value === 1) return;
-  retainerTasks.value = Math.max(1, retainerTasks.value - 1);
-  captureEvent("retainer_task_count_changed", { task_count: retainerTasks.value });
-}
-
-function incrementRetainerTasks() {
-  retainerTasks.value++;
-  captureEvent("retainer_task_count_changed", { task_count: retainerTasks.value });
 }
 
 const socialLinks = [
@@ -393,9 +424,11 @@ const projects = computed(() =>
 const projectPages = computed(() =>
   projectMeta.map((p, i) => ({
     ...p,
+    projectPath: `/${lang.value}/projects/${p.slug}`,
     alt: t.value.work.projectAlts[i],
     tag: t.value.projectsPage.tags[p.slug],
     brief: t.value.projectsPage.briefs[p.slug],
+    seo: t.value.projectsPage.seo[p.slug],
     shots: p.shots.map((shot, si) =>
       typeof shot === "string"
         ? { file: shot, tall: false, alt: `${p.name} — ${si + 1}` }
@@ -413,7 +446,10 @@ const activeProject = computed(() =>
 const projectsContentRef = ref(null);
 
 function readRoute() {
-  const parts = window.location.pathname.split("/").filter(Boolean);
+  const pathname = typeof window === "undefined" ? props.initialPath : window.location.pathname;
+  const parts = pathname.split("/").filter(Boolean);
+  const routeLocale = SUPPORTED_LOCALES.includes(parts[0]) ? parts.shift() : "es";
+  if (lang.value !== routeLocale) lang.value = routeLocale;
   if (parts[0] === "projects") {
     view.value = "projects";
     activeSlug.value = projectMeta.some((p) => p.slug === parts[1]) ? parts[1] : null;
@@ -432,26 +468,29 @@ function scrollViewTop() {
   });
 }
 
-function navigate(path) {
+function navigate(path, shouldScroll = true) {
   if (window.location.pathname !== path) window.history.pushState({}, "", path);
   readRoute();
-  scrollViewTop();
+  if (shouldScroll) scrollViewTop();
 }
+
+const homePath = computed(() => `/${lang.value}`);
+const projectsPath = computed(() => `/${lang.value}/projects`);
 
 function goProjects(event) {
   if (event) event.preventDefault();
   captureEvent("projects_page_opened");
   if (mobileMenuOpen.value) setMobileMenuOpen(false);
-  navigate("/projects");
+  navigate(projectsPath.value);
 }
 
 function openProject(project) {
   captureEvent("project_detail_opened", { project_name: project.name });
-  navigate(`/projects/${project.slug}`);
+  navigate(`/${lang.value}/projects/${project.slug}`);
 }
 
 function closeProject() {
-  navigate("/projects");
+  navigate(projectsPath.value);
 }
 
 function handlePopState() {
@@ -460,7 +499,7 @@ function handlePopState() {
 }
 
 watch([view, activeSlug, lang], () => {
-  syncDocTitle();
+  syncSeoMeta();
 });
 
 watch(view, (v) => {
@@ -486,22 +525,13 @@ watch([view, activeSlug], () => {
   nextTick(() => setupProjectsListReveal());
 });
 
-const heroSlides = [
-  "aparicio-2.png", "collecta-3.png", "burntab.png", "ducati.png",
-  "aparicio-4.png", "collecta.png", "burntab-3.png", "aparicio.png",
-  "collecta-2.png", "burntab-2.png", "aparicio-3.png",
-];
-const heroSlide = ref(0);
-const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png"]);
-let heroTimer = null;
-
-function heroPrev() {
-  heroSlide.value = (heroSlide.value - 1 + heroSlides.length) % heroSlides.length;
-}
-
-function heroNext() {
-  heroSlide.value = (heroSlide.value + 1) % heroSlides.length;
-}
+const heroImage = new URL("../assets/responsive/aparicio-2-1200.webp", import.meta.url).href;
+const heroImageSrcset = [
+  `${new URL("../assets/responsive/aparicio-2-480.webp", import.meta.url).href} 480w`,
+  `${new URL("../assets/responsive/aparicio-2-768.webp", import.meta.url).href} 768w`,
+  `${heroImage} 1200w`,
+  `${asset("aparicio-2.png")} 1920w`,
+].join(", ");
 
 const workSlide = ref(0);
 let workTimer = null;
@@ -536,11 +566,11 @@ const strokeIcon = (d) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
 const categoryMeta = [
-  { svg: strokeIcon('<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8.5h18"/><path d="M10 12.5l-2 2 2 2"/><path d="M14 12.5l2 2-2 2"/>') },
-  { svg: strokeIcon('<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20"/>') },
-  { svg: strokeIcon('<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M10.5 18h3"/>') },
+  { svg: strokeIcon('<path d="M4 17.5 16.8 4.7a2.1 2.1 0 0 1 3 3L7 20.5 3 21z"/><path d="m14.8 6.7 3 3"/>') },
   { svg: strokeIcon('<path d="M8.5 8.5 5 12l3.5 3.5"/><path d="M15.5 8.5 19 12l-3.5 3.5"/><path d="M13.5 6l-3 12"/>') },
-  { svg: `<span class="brand-clip"><img class="brand-img" src="${asset("app-store-logo.png")}" alt="" /></span>` },
+  { svg: strokeIcon('<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/><path d="M8.5 11h5M11 8.5v5"/>') },
+  { svg: strokeIcon('<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M10.5 18h3"/>') },
+  { svg: strokeIcon('<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3 10h18"/><path d="M8 14h3v3H8z"/>') },
   {
     href: "/projects",
     toProjects: true,
@@ -550,7 +580,11 @@ const categoryMeta = [
 ];
 
 const categories = computed(() =>
-  categoryMeta.map((c, i) => ({ ...c, label: t.value.categories[i] }))
+  categoryMeta.map((c, i) => ({
+    ...c,
+    href: c.toProjects ? projectsPath.value : c.href,
+    label: t.value.categories[i],
+  }))
 );
 
 const boardMeta = [
@@ -568,147 +602,19 @@ const board = computed(() =>
   }))
 );
 
-const storyArc = [
-  { text: "We build our own products too — TuParty, BurnTab, Collecta." },
-  { text: "An idea, a rough sketch, that feeling it could become something real.", emoji: "✏️" },
-  { text: "But then came the hard part…", mark: "finding people to build it." },
-  { text: "One person for UI, another for branding, someone else for motion. Explaining the vision again and again and again…" },
-  { text: "Somewhere along the way the product stops feeling exciting — and trust us, it's not you." },
-];
-
 const problemPoints = computed(() => t.value.problem.points);
-
-const services = [
-  { index: "01", title: "Landing pages", description: "High-converting pages, designed and coded to load fast and sell clearly." },
-  { index: "02", title: "Website design", description: "Full marketing and brand sites, from first layout to a live, responsive launch." },
-  { index: "03", title: "Mobile app design", description: "iOS and Android product design — flows, screens and a build-ready UI kit." },
-  { index: "04", title: "Web apps", description: "Dashboards, tools and platforms in production-ready React or Vue." },
-  { index: "05", title: "Branding & logo", description: "Wordmarks, logos and visual systems that make a product unmistakably yours." },
-  { index: "06", title: "Product design", description: "Flows and interfaces simple enough to actually use." },
-  { index: "07", title: "Development", description: "We ship the real thing: responsive, accessible and fast — no handoff gap." },
-  { index: "08", title: "Animation", description: "Motion for hero sections, product demos and launch moments." },
-  { index: "09", title: "Pitch decks", description: "Investor and sales decks that look like the product behind them." },
-];
 
 const story = computed(() => t.value.studio.story);
 
-const pricingNums = {
-  landing: { base: 399, addons: {} },
-  webapp: { retainerOnly: true },
-  mobile: { retainerOnly: true },
-  screenshots: { base: 550, addons: { pages: { price: 90 } } },
-};
-const tabOrder = ["landing", "webapp", "mobile", "screenshots"];
-
-const pricingTabs = computed(() =>
-  tabOrder.map((id) => {
-    const num = pricingNums[id];
-    const txt = t.value.pricing.tabs[id];
-    if (num.retainerOnly) return { id, label: txt.label, retainerOnly: true };
-    const addons = {};
-    for (const key in num.addons) addons[key] = { ...num.addons[key], ...txt.addons[key] };
-    return {
-      id,
-      label: txt.label,
-      title: txt.title,
-      days: txt.days,
-      base: num.base,
-      label2: txt.label2,
-      note: txt.note,
-      addons,
-      features: txt.features,
-    };
-  })
-);
-
-const activeTab = ref("landing");
-const addDev = ref(false);
-const extraPages = ref(0);
-const extraAnims = ref(0);
-const activeTier = computed(() => pricingTabs.value.find((tab) => tab.id === activeTab.value));
-const retainerTasks = ref(1);
+const activeTier = computed(() => ({
+  ...t.value.pricing.tabs.landing,
+  base: 399,
+  addons: {},
+}));
 const bookingAddonOpen = ref(false);
 const bookingAddonRef = ref(null);
 
-function selectTab(id) {
-  const tab = pricingTabs.value.find((tb) => tb.id === id);
-  activeTab.value = id;
-  addDev.value = false;
-  bookingAddonOpen.value = false;
-  extraPages.value = 0;
-  extraAnims.value = 0;
-  captureEvent("pricing_tab_selected", { tab_id: id, tab_label: tab?.label });
-  nextTick(() => {
-    updateTabIndicator();
-    tabsWrap.value
-      ?.querySelector(".pricing-tab.is-active")
-      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  });
-}
-
-// sliding indicator behind the active pricing tab
-const tabsWrap = ref(null);
-const tabIndicator = ref({ left: 0, top: 0, width: 0, height: 0, opacity: 0 });
-const tabIndicatorStyle = computed(() => ({
-  transform: `translate(${tabIndicator.value.left}px, ${tabIndicator.value.top}px)`,
-  width: `${tabIndicator.value.width}px`,
-  height: `${tabIndicator.value.height}px`,
-  opacity: tabIndicator.value.opacity,
-}));
-function updateTabIndicator() {
-  const wrap = tabsWrap.value;
-  const active = wrap?.querySelector(".pricing-tab.is-active");
-  if (!active) return;
-  tabIndicator.value = {
-    left: active.offsetLeft,
-    top: active.offsetTop,
-    width: active.offsetWidth,
-    height: active.offsetHeight,
-    opacity: 1,
-  };
-}
-
-// keep the panel container mounted; only tween its height while inner content swaps
-const pricingShell = ref(null);
-const panelHeight = ref("auto");
-const panelAnimating = ref(false);
-function tabBeforeLeave() {
-  if (pricingShell.value) panelHeight.value = `${pricingShell.value.offsetHeight}px`;
-  panelAnimating.value = true;
-}
-function tabEnter(el, done) {
-  const shell = pricingShell.value;
-  const target = el.offsetHeight;
-  let finished = false;
-  const finish = () => {
-    if (finished) return;
-    finished = true;
-    shell?.removeEventListener("transitionend", onEnd);
-    done();
-  };
-  const onEnd = (e) => {
-    if (e.target === shell && e.propertyName === "height") finish();
-  };
-  shell?.addEventListener("transitionend", onEnd);
-  window.setTimeout(finish, 480);
-  requestAnimationFrame(() => {
-    panelHeight.value = `${target}px`;
-  });
-}
-function tabAfterEnter() {
-  panelHeight.value = "auto";
-  panelAnimating.value = false;
-}
-
-const totalPrice = computed(() => {
-  const tier = activeTier.value;
-  if (!tier || tier.retainerOnly) return 0;
-  let total = tier.base;
-  if (addDev.value && tier.addons.dev) total += tier.addons.dev.price;
-  if (tier.addons.pages) total += extraPages.value * tier.addons.pages.price;
-  if (tier.addons.anim) total += extraAnims.value * tier.addons.anim.price;
-  return total;
-});
+const totalPrice = computed(() => activeTier.value.base);
 
 const euro = (value) => `${value.toLocaleString(lang.value === "es" ? "es-ES" : "en-IE")} €`;
 
@@ -821,7 +727,7 @@ function handleAnchorClick(event) {
 
   if (view.value !== "home" && href && href.startsWith("#")) {
     event.preventDefault();
-    navigate("/");
+    navigate(homePath.value);
     if (href === "#top") return;
     nextTick(() => {
       const dest = document.querySelector(href);
@@ -890,8 +796,7 @@ function setupRevealObserver() {
     document.querySelectorAll(
       [
         ".section-observe .section-heading",
-        ".hero-inner > *",
-        ".hero-media",
+        ".hero-inner > .hero-actions",
         ".narrative p",
         ".problem-block > *:not(.problem-points)",
         ".problem-points li",
@@ -930,8 +835,6 @@ function setupRevealObserver() {
   // Prose blocks reveal line by line (top→bottom mask wipe) instead of as a
   // single block. Only text paragraphs — not cards, media or headings.
   const proseSelector = [
-    ".hero-title",
-    ".hero-eyebrow",
     ".narrative p",
     ".problem-lead",
     ".problem-points li",
@@ -1014,7 +917,6 @@ function setupRevealObserver() {
   // their normal stagger, so they never lag behind the scroll.
   const seqDelay = new Map();
   const sequencedSelector = [
-    ".hero-media",
     ".board",
     ".category-grid",
     ".how-steps",
@@ -1176,26 +1078,19 @@ onMounted(async () => {
   window.addEventListener("keydown", handleKeydown);
   window.addEventListener("popstate", handlePopState);
 
-  heroTimer = window.setInterval(() => {
-    heroSlide.value = (heroSlide.value + 1) % heroSlides.length;
-  }, 3200);
-
   workTimer = window.setInterval(workAdvance, 4600);
 
-  syncDocTitle();
+  syncSeoMeta();
   setupRevealObserver();
   if (view.value === "projects" && !activeSlug.value) setupProjectsListReveal();
   if (view.value === "projects" && activeSlug.value) setupProjectShotsReveal();
   setActiveSection();
-  updateTabIndicator();
-  window.addEventListener("resize", updateTabIndicator);
 });
 
 onBeforeUnmount(() => {
   contentRef.value?.removeEventListener("scroll", requestActiveSectionUpdate);
   window.removeEventListener("scroll", requestActiveSectionUpdate);
   window.removeEventListener("resize", requestActiveSectionUpdate);
-  window.removeEventListener("resize", updateTabIndicator);
   window.removeEventListener("keydown", handleKeydown);
   window.removeEventListener("popstate", handlePopState);
   mobileQuery.value?.removeEventListener("change", handleMediaChange);
@@ -1203,7 +1098,6 @@ onBeforeUnmount(() => {
   projectsListObserver?.disconnect();
   projectShotsObserver?.disconnect();
   if (companyLogosAnimationTimer) window.clearTimeout(companyLogosAnimationTimer);
-  if (heroTimer) window.clearInterval(heroTimer);
   if (workTimer) window.clearInterval(workTimer);
   if (categoryMagnetFrame) cancelAnimationFrame(categoryMagnetFrame);
   document.body.classList.remove("mobile-menu-open");
@@ -1255,7 +1149,7 @@ const vTilt = {
       <div class="sidebar-top">
         <div class="brand-row">
           <a class="brand" href="#top" aria-label="Terron Studio home" @click="handleAnchorClick">
-            <img class="brand-mark" :src="asset('terron-logo.png')" alt="Terron Studio" />
+            <img class="brand-mark" :src="asset('terron-logo.png')" v-bind="imageSize('terron-logo.png')" alt="Terron Studio" decoding="async" />
           </a>
         </div>
 
@@ -1297,8 +1191,8 @@ const vTilt = {
       <div class="sidebar-bottom">
         <div class="lang-toggle desktop-lang" :class="`lang-${lang}`" role="group" aria-label="Language">
           <span class="lang-slider" aria-hidden="true"></span>
-          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-pressed="String(lang === 'es')" @click="setLang('es')">ES</button>
-          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-pressed="String(lang === 'en')" @click="setLang('en')">EN</button>
+          <a :href="currentPathForLocale('es')" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-current="lang === 'es' ? 'page' : undefined" hreflang="es" lang="es" @click="setLang('es', $event)">ES</a>
+          <a :href="currentPathForLocale('en')" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-current="lang === 'en' ? 'page' : undefined" hreflang="en" lang="en" @click="setLang('en', $event)">EN</a>
         </div>
         <p class="rail-label"><span class="rail-label-lighter">{{ t.trustedPre }}</span> {{ t.trustedCompanies }}</p>
         <div
@@ -1312,7 +1206,9 @@ const vTilt = {
             :class="{ 'logo-rounded': company.rounded, 'logo-white': company.white, 'logo-inset': company.inset }"
             :style="{ '--logo-index': index }"
             :src="asset(company.file)"
+            v-bind="imageSize(company.file)"
             :alt="company.name"
+            decoding="async"
           />
         </div>
       </div>
@@ -1321,7 +1217,7 @@ const vTilt = {
     <header class="mobile-header" :class="{ 'is-open': mobileMenuOpen }">
       <a class="brand compact" href="#top" aria-label="Terron Studio home" @click="handleAnchorClick">
         <span class="brand-mark">
-          <img :src="asset('terron-logo.png')" alt="Terron Studio" />
+          <img :src="asset('terron-logo.png')" v-bind="imageSize('terron-logo.png')" alt="" aria-hidden="true" decoding="async" />
         </span>
         <span class="brand-text">Terron Studio</span>
       </a>
@@ -1361,8 +1257,8 @@ const vTilt = {
       <div class="sidebar-bottom">
         <div class="lang-toggle mobile-lang" :class="`lang-${lang}`" role="group" aria-label="Language">
           <span class="lang-slider" aria-hidden="true"></span>
-          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-pressed="String(lang === 'es')" @click="setLang('es')">ES</button>
-          <button type="button" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-pressed="String(lang === 'en')" @click="setLang('en')">EN</button>
+          <a :href="currentPathForLocale('es')" class="lang-option" :class="{ 'is-active': lang === 'es' }" :aria-current="lang === 'es' ? 'page' : undefined" hreflang="es" lang="es" @click="setLang('es', $event)">ES</a>
+          <a :href="currentPathForLocale('en')" class="lang-option" :class="{ 'is-active': lang === 'en' }" :aria-current="lang === 'en' ? 'page' : undefined" hreflang="en" lang="en" @click="setLang('en', $event)">EN</a>
         </div>
         <p class="rail-label"><span class="rail-label-lighter">{{ t.trustedPre }}</span> {{ t.trustedCompanies }}</p>
         <div class="company-logo-grid">
@@ -1371,20 +1267,22 @@ const vTilt = {
             :key="company.name"
             :class="{ 'logo-rounded': company.rounded, 'logo-white': company.white, 'logo-inset': company.inset }"
             :src="asset(company.file)"
+            v-bind="imageSize(company.file)"
             :alt="company.name"
+            decoding="async"
           />
         </div>
       </div>
     </nav>
 
-    <main id="top" ref="contentRef" class="content" v-show="view === 'home'">
+    <main v-if="view === 'home'" id="top" ref="contentRef" class="content">
       <div class="main-panel">
         <!-- HERO -->
         <section class="hero section-observe" data-section="top">
           <div class="hero-inner">
             <p class="hero-eyebrow">{{ t.hero.eyebrow }}</p>
             <h1 class="hero-title">
-              {{ t.hero.titlePre }} <img class="hero-inline-logo" :src="asset('terron-logo.png')" alt="" aria-hidden="true" /> {{ t.hero.titleMid }}
+              {{ t.hero.titlePre }} <img class="hero-inline-logo" :src="asset('terron-logo.png')" v-bind="imageSize('terron-logo.png')" alt="" aria-hidden="true" decoding="async" /> {{ t.hero.titleMid }}
               <span class="soft">{{ t.hero.titleSoft }}</span> {{ t.hero.titlePost }}
             </h1>
             <div class="hero-actions">
@@ -1392,22 +1290,27 @@ const vTilt = {
                 <span class="pill-icon meet" aria-hidden="true"></span>
                 {{ t.bookCall }}
               </a>
-              <a class="pill-button" href="/projects" @click="goProjects">
+              <a class="pill-button" :href="projectsPath" @click="goProjects">
                 <span class="pill-icon folder" aria-hidden="true"></span>
                 {{ t.seeProjects }}
               </a>
             </div>
           </div>
 
-          <div class="hero-media" aria-label="Selected work preview">
+          <div class="hero-media" role="img" aria-label="Selected work preview">
             <div class="hero-media-frame">
               <img
-                v-for="(slide, index) in heroSlides"
-                :key="slide"
-                :class="{ 'is-active': heroSlide === index, 'zoom': heroZoomShots.has(slide) }"
-                :src="asset(slide)"
+                class="is-active"
+                :src="heroImage"
+                :srcset="heroImageSrcset"
+                sizes="(max-width: 820px) calc(70vw - 31px), 605px"
+                width="1200"
+                height="960"
                 alt=""
                 aria-hidden="true"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
               />
               <div class="hero-media-glow"></div>
             </div>
@@ -1460,7 +1363,7 @@ const vTilt = {
               rel="noreferrer"
               @click="card.project && handleProjectLinkClick(card.project)"
             >
-              <span class="board-photo"><img :src="asset(card.image)" :alt="card.caption" /></span>
+              <span class="board-photo"><img :src="asset(card.image)" v-bind="imageSize(card.image)" alt="" aria-hidden="true" loading="lazy" decoding="async" /></span>
               <span class="board-caption">{{ card.caption }}</span>
             </a>
           </div>
@@ -1472,7 +1375,7 @@ const vTilt = {
         <section id="our-work" class="section about-block section-observe" data-section="work">
           <div class="section-heading"><h2>{{ t.work.heading }}</h2></div>
           <p class="work-lead" v-html="t.work.leadHtml"></p>
-          <div class="hero-media compact work-media" aria-label="Selected work">
+          <div class="hero-media compact work-media" role="region" aria-label="Selected work">
             <div class="carousel">
               <div
                 class="carousel-track"
@@ -1487,7 +1390,7 @@ const vTilt = {
                   rel="noreferrer"
                   @click="handleProjectLinkClick(project)"
                 >
-                  <img :src="asset(project.cover)" :alt="project.alt" />
+                  <img :src="asset(project.cover)" v-bind="imageSize(project.cover)" :alt="project.alt" loading="lazy" decoding="async" />
                 </a>
               </div>
               <button class="carousel-arrow prev" type="button" :aria-label="t.aria.prev" @click="workPrev">
@@ -1575,7 +1478,7 @@ const vTilt = {
                   </div>
                 </div>
                 <span class="how-logo-tile" aria-hidden="true">
-                  <img :src="asset('terron-logo.png')" alt="" />
+                  <img :src="asset('terron-logo.png')" v-bind="imageSize('terron-logo.png')" alt="" loading="lazy" decoding="async" />
                 </span>
               </div>
               <div class="how-body">
@@ -1588,9 +1491,9 @@ const vTilt = {
             <article class="how-card how-card--launch">
               <div class="how-visual">
                 <div class="how-stack" aria-hidden="true">
-                  <img class="how-shot how-shot--1" :src="asset('burntab.png')" alt="" />
-                  <img class="how-shot how-shot--2" :src="asset('collecta.png')" alt="" />
-                  <img class="how-shot how-shot--3" :src="asset('ducati.png')" alt="" />
+                  <img class="how-shot how-shot--1" :src="asset('burntab.png')" v-bind="imageSize('burntab.png')" alt="" loading="lazy" decoding="async" />
+                  <img class="how-shot how-shot--2" :src="asset('collecta.png')" v-bind="imageSize('collecta.png')" alt="" loading="lazy" decoding="async" />
+                  <img class="how-shot how-shot--3" :src="asset('ducati.png')" v-bind="imageSize('ducati.png')" alt="" loading="lazy" decoding="async" />
                 </div>
               </div>
               <div class="how-body">
@@ -1611,31 +1514,8 @@ const vTilt = {
           <div class="section-heading"><h2>{{ t.pricing.heading }}</h2></div>
           <p class="section-lead" v-html="t.pricing.leadHtml"></p>
 
-          <div class="pricing-tabs" role="tablist" ref="tabsWrap">
-            <span class="pricing-tab-indicator" :style="tabIndicatorStyle" aria-hidden="true"></span>
-            <button
-              v-for="tab in pricingTabs"
-              :key="tab.id"
-              type="button"
-              class="pricing-tab"
-              :class="{ 'is-active': activeTab === tab.id }"
-              role="tab"
-              :aria-selected="String(activeTab === tab.id)"
-              @click="selectTab(tab.id)"
-            >
-              {{ tab.label }}
-            </button>
-          </div>
-
-          <div class="pricing-shell" v-if="!activeTier.retainerOnly" :class="{ 'is-animating': panelAnimating }" ref="pricingShell" :style="{ height: panelHeight }">
-          <transition
-            name="tab-fade"
-            mode="out-in"
-            @before-leave="tabBeforeLeave"
-            @enter="tabEnter"
-            @after-enter="tabAfterEnter"
-          >
-          <div class="pricing-panel" :key="activeTab">
+          <div class="pricing-shell">
+          <div class="pricing-panel">
             <div class="pricing-config">
               <div class="pricing-config-head">
                 <h3>{{ activeTier.title }}</h3>
@@ -1644,49 +1524,11 @@ const vTilt = {
 
               <p v-if="activeTier.note" class="pricing-note">{{ activeTier.note }}</p>
 
-              <button
-                v-if="activeTier.addons.dev"
-                type="button"
-                class="addon-toggle"
-                :class="{ 'is-on': addDev }"
-                @click="toggleDevAddon()"
-              >
-                <span class="addon-label">
-                  {{ activeTier.addons.dev.label }}
-                  <span class="addon-price">+{{ euro(activeTier.addons.dev.price) }}</span>
-                </span>
-                <span class="switch" :class="{ 'is-on': addDev }" aria-hidden="true"><i></i></span>
-              </button>
-
-              <div v-if="activeTier.addons.pages" class="addon-row">
-                <span class="addon-label">
-                  {{ activeTier.addons.pages.label }}
-                  <span class="addon-price">+{{ euro(activeTier.addons.pages.price) }}{{ activeTier.addons.pages.unit }}</span>
-                </span>
-                <span class="stepper">
-                  <button type="button" @click="extraPages = Math.max(0, extraPages - 1)" :aria-label="t.aria.lessPages">–</button>
-                  <b>{{ extraPages }}</b>
-                  <button type="button" @click="extraPages++" :aria-label="t.aria.morePages">+</button>
-                </span>
-              </div>
-
-              <div v-if="activeTier.addons.anim" class="addon-row">
-                <span class="addon-label">{{ activeTier.addons.anim.label }}</span>
-                <span class="addon-stepper">
-                  <span class="addon-price">+{{ euro(activeTier.addons.anim.price) }}{{ activeTier.addons.anim.unit }}</span>
-                  <span class="stepper">
-                    <button type="button" @click="extraAnims = Math.max(0, extraAnims - 1)" :aria-label="t.aria.lessAnims">–</button>
-                    <b>{{ extraAnims }}</b>
-                    <button type="button" @click="extraAnims++" :aria-label="t.aria.moreAnims">+</button>
-                  </span>
-                </span>
-              </div>
-
               <ul class="pricing-features">
                 <li v-for="feature in activeTier.features" :key="feature">{{ feature }}</li>
               </ul>
 
-              <div v-if="activeTab === 'landing'" ref="bookingAddonRef" class="booking-addon-inline">
+              <div ref="bookingAddonRef" class="booking-addon-inline">
                 <button
                   type="button"
                   class="addon-toggle booking-addon-trigger"
@@ -1721,7 +1563,7 @@ const vTilt = {
                 <span class="price-card-label">{{ activeTier.label2 }}</span>
                 <span class="price-card-value">{{ euro(totalPrice) }}</span>
               </div>
-              <div v-if="bookingAddonOpen && activeTab === 'landing'" class="price-card green booking-price-card" v-tilt>
+              <div v-if="bookingAddonOpen" class="price-card green booking-price-card" v-tilt>
                 <span class="price-card-glare" aria-hidden="true"></span>
                 <span class="price-card-brand">EXTRAS</span>
                 <span class="price-card-label">{{ t.pricing.bookingSystem.title }}</span>
@@ -1742,42 +1584,6 @@ const vTilt = {
               </a>
             </div>
           </div>
-          </transition>
-          </div>
-
-          <div v-if="activeTier.retainerOnly" class="retainer-card">
-            <div class="retainer-config">
-              <h3>{{ t.pricing.retainer.title }}</h3>
-              <div class="addon-row">
-                <span class="addon-label">{{ t.pricing.retainer.activeTask }}</span>
-                <span class="stepper green">
-                  <button type="button" @click="decrementRetainerTasks()" :aria-label="t.aria.lessTasks">–</button>
-                  <b>{{ retainerTasks }}</b>
-                  <button type="button" @click="incrementRetainerTasks()" :aria-label="t.aria.moreTasks">+</button>
-                </span>
-              </div>
-              <ul class="pricing-features">
-                <li v-for="(feature, i) in t.pricing.retainer.features" :key="i">{{ feature }}</li>
-              </ul>
-            </div>
-            <div class="pricing-summary">
-              <div class="price-card green" v-tilt>
-                <span class="price-card-glare" aria-hidden="true"></span>
-                <span class="price-card-brand">TERRON</span>
-                <span class="price-card-label">{{ t.pricing.retainer.monthly }}</span>
-                <span class="price-card-value">{{ euro(2800 + (retainerTasks - 1) * 1500) }}<small>{{ t.pricing.retainer.perMo }}</small></span>
-              </div>
-            </div>
-            <div class="pricing-actions">
-              <a class="button primary" href="#contact" @click="openContact($event, 'pricing')">
-                <span class="pill-icon send" aria-hidden="true"></span>
-                {{ t.sendMessage }}
-              </a>
-              <a class="button secondary" :href="bookCallHref" @click="openBook($event)">
-                <span class="pill-icon meet" aria-hidden="true"></span>
-                {{ t.bookCall }}
-              </a>
-            </div>
           </div>
 
         </section>
@@ -1786,7 +1592,7 @@ const vTilt = {
         <section id="studio" class="section studio-section section-observe" data-section="studio">
           <div class="section-heading"><h2>{{ t.studio.heading }}</h2></div>
           <p class="studio-lead">
-            {{ t.studio.leadPre }} <span class="lead-name"><img :src="asset('terron-pfp.webp')" alt="" aria-hidden="true" /> {{ t.studio.leadName }}</span><br />
+            {{ t.studio.leadPre }} <span class="lead-name"><img :src="asset('terron-pfp.webp')" v-bind="imageSize('terron-pfp.webp')" alt="" aria-hidden="true" loading="lazy" decoding="async" /> {{ t.studio.leadName }}</span><br />
             {{ t.studio.leadPost }}
           </p>
           <div class="story-copy">
@@ -1801,13 +1607,13 @@ const vTilt = {
             <p>{{ t.letter.p1 }}</p>
             <p v-html="t.letter.p2Html"></p>
             <p>{{ t.letter.p3 }}</p>
-            <p>{{ t.letter.p4 }}</p>
+            <p v-html="t.letter.p4Html"></p>
             <p>{{ t.letter.p5 }}</p>
             <p class="letter-final" v-html="t.letter.finalHtml"></p>
           </div>
 
           <div class="letter-sign">
-            <img class="sign-mark" :src="asset('signature.png')" alt="Gonzalo Terrón signature" />
+            <img class="sign-mark" :src="asset('signature.png')" v-bind="imageSize('signature.png')" alt="Firma de Gonzalo Terrón" loading="lazy" decoding="async" />
             <div>
               <p class="sign-name">Gonzalo Rodríguez Terrón</p>
               <p class="sign-role">{{ t.letter.role }}</p>
@@ -1819,7 +1625,7 @@ const vTilt = {
               <span class="pill-icon meet" aria-hidden="true"></span>
               {{ t.bookCall }}
             </a>
-            <a class="pill-button" href="/projects" @click="goProjects">
+            <a class="pill-button" :href="projectsPath" @click="goProjects">
               <span class="pill-icon folder" aria-hidden="true"></span>
               {{ t.seeProjects }}
             </a>
@@ -1866,40 +1672,47 @@ const vTilt = {
             </header>
 
             <div class="pg-grid">
-              <button
-                v-for="project in projectPages"
+              <a
+                v-for="(project, index) in projectPages"
                 :key="project.slug"
-                type="button"
+                :href="project.projectPath"
                 class="pg-card pg-list-reveal"
-                @click="openProject(project)"
+                @click.prevent="openProject(project)"
               >
                 <span class="pg-shot">
-                  <img :src="cover(project.cover)" :alt="project.alt" loading="lazy" />
+                  <img
+                    :src="cover(project.cover)"
+                    v-bind="coverSize(project.cover)"
+                    :alt="project.alt"
+                    :loading="index < 2 ? 'eager' : 'lazy'"
+                    :fetchpriority="index === 0 ? 'high' : 'auto'"
+                    decoding="async"
+                  />
                 </span>
                 <span class="pg-caption">
                   <span class="pg-name">{{ project.name }}</span>
                 </span>
-              </button>
+              </a>
             </div>
           </div>
 
           <!-- DETAIL -->
           <div v-else :key="activeProject.slug" class="pg-detail" :class="{ 'is-ducati': activeProject.slug === 'ducati-w93' }">
             <header class="pg-detail-head">
-              <button
-                type="button"
+              <a
+                :href="projectsPath"
                 class="pg-back"
                 :aria-label="t.projectsPage.back"
-                @click="closeProject"
+                @click.prevent="closeProject"
               >
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-              </button>
-              <span class="pg-title-wrap">
+              </a>
+              <h1 class="pg-title-wrap">
                 <span class="pg-title">{{ activeProject.name }}</span>
                 <span class="pg-subtitle">{{ activeProject.tag }}</span>
-              </span>
+              </h1>
               <a
                 class="pg-visit"
                 :href="activeProject.href"
@@ -1925,12 +1738,19 @@ const vTilt = {
 
             <div class="pg-shots">
               <figure
-                v-for="item in activeProject.shots"
+                v-for="(item, index) in activeProject.shots"
                 :key="item.file"
                 class="pg-shot-item pg-shot-reveal"
                 :class="{ 'is-tall': item.tall }"
               >
-                <img :src="shot(item.file)" :alt="item.alt" loading="eager" />
+                <img
+                  :src="shot(item.file)"
+                  v-bind="imageSize(item.file)"
+                  :alt="item.alt"
+                  :loading="index === 0 ? 'eager' : 'lazy'"
+                  :fetchpriority="index === 0 ? 'high' : 'auto'"
+                  decoding="async"
+                />
               </figure>
             </div>
           </div>

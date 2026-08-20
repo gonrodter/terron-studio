@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 8080",
-    "build": "vite build",
+    "build": "npm run build:client && npm run build:ssr && npm run prerender",
+    "build:client": "vite build --manifest",
+    "build:ssr": "vite build --ssr src/entry-server.js --outDir dist-ssr",
+    "prerender": "node scripts/prerender.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 8080"
   },
   "dependencies": {

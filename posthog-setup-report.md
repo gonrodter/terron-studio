@@ -1,6 +1,6 @@
 # PostHog post-wizard report
 
-The wizard has completed a deep integration of PostHog into the Terron Studio portfolio site (Vue 3 + Vite, single-page application). PostHog is initialized in `src/main.js` with environment-variable-based configuration, a global Vue error handler forwards uncaught exceptions to PostHog, and 8 custom events are captured across the key user interactions on the page.
+The wizard has completed a deep integration of PostHog into the Terron Studio portfolio site (Vue 3 + Vite, single-page application). PostHog is initialized on first interaction from `src/analytics.js` with environment-variable-based configuration, a global Vue error handler forwards uncaught exceptions to PostHog, and custom events are captured across the key user interactions on the page. Session recording, surveys and feature flags are disabled because this site only uses product analytics events.
 
 | Event name | Description | File |
 |---|---|---|

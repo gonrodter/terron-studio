@@ -1,11 +1,13 @@
-# Gonzalo Rodriguez Terron Portfolio
+# Terron Studio
 
-Vue and Tailwind portfolio generated from the provided CV, with visual direction adapted from `https://www.kree8.studio/`.
+Vue website for Terron Studio, available in Spanish and English.
 
 ## Project Structure
 
 - `src/App.vue` - portfolio content, section data, navigation behavior and responsive menu state
 - `src/main.js` - Vue entry point
+- `src/seo.js` - localized routes and shared SEO metadata
+- `scripts/prerender.mjs` - static HTML generation for every indexable route
 - `styles.css` - current visual system, wired through Tailwind/PostCSS
 - `assets/` - logos, project screenshots, pins, tape, clips and social preview image
 
@@ -18,11 +20,18 @@ npm run dev
 
 Then open `http://127.0.0.1:8080/`.
 
+The indexable routes live under `/es` and `/en`. The root URL redirects to
+`/es` in production, and every project has an equivalent route in both
+languages.
+
 ## Production Build
 
 ```sh
 npm run build
 ```
+
+The production build creates client assets, server-renders all localized
+routes, and writes their final HTML to `dist/`.
 
 ## PostHog
 

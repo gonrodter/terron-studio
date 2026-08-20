@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://terron-studio.com/sitemap.xml
