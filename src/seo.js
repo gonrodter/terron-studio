@@ -66,7 +66,7 @@ export function getRouteSeo(path, localeOverride) {
   const alternates = {
     es: getLocalizedPath(contentPath, "es"),
     en: getLocalizedPath(contentPath, "en"),
-    xDefault: getLocalizedPath(contentPath, "es"),
+    xDefault: contentPath === "/" ? "/" : getLocalizedPath(contentPath, "es"),
   };
   const slug = parts[0] === "projects" ? parts[1] ?? null : null;
   const project = slug ? projectData[slug] : null;

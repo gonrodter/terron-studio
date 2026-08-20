@@ -1,6 +1,18 @@
 {
   "redirects": [
-    { "source": "/", "destination": "/es", "permanent": true },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^[eE][nN].*"
+        }
+      ],
+      "destination": "/en",
+      "permanent": false
+    },
+    { "source": "/", "destination": "/es", "permanent": false },
     { "source": "/projects", "destination": "/es/projects", "permanent": true },
     {
       "source": "/projects/:slug",

@@ -20,9 +20,9 @@ npm run dev
 
 Then open `http://127.0.0.1:8080/`.
 
-The indexable routes live under `/es` and `/en`. The root URL redirects to
-`/es` in production, and every project has an equivalent route in both
-languages.
+The indexable routes live under `/es` and `/en`. In production, the root URL
+temporarily redirects English-first browsers to `/en` and uses `/es` as the
+fallback. Every project has an equivalent route in both languages.
 
 ## Production Build
 
