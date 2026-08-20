@@ -554,14 +554,18 @@ const categories = computed(() =>
 );
 
 const boardMeta = [
-  { image: "collecta.png", pin: "red", rotate: -4 },
-  { image: "burntab.png", pin: "green", rotate: 3 },
-  { image: "aparicio.png", pin: "tape", rotate: -3 },
-  { image: "ducati.png", pin: "clip", rotate: 1.5 },
+  { slug: "collecta", image: "collecta.png", pin: "red", rotate: -4 },
+  { slug: "burntab", image: "burntab.png", pin: "green", rotate: 3 },
+  { slug: "aparicio-alemany", image: "aparicio.png", pin: "tape", rotate: -3 },
+  { slug: "ducati-w93", image: "ducati.png", pin: "clip", rotate: 1.5 },
 ];
 
 const board = computed(() =>
-  boardMeta.map((c, i) => ({ ...c, caption: t.value.solution.boardCaptions[i] }))
+  boardMeta.map((c, i) => ({
+    ...c,
+    caption: t.value.solution.boardCaptions[i],
+    project: projects.value.find((project) => project.slug === c.slug),
+  }))
 );
 
 const storyArc = [
@@ -1446,15 +1450,15 @@ const vTilt = {
 
           <div class="board" aria-label="Selected work">
             <a
-              v-for="(card, index) in board"
-              :key="index"
+              v-for="card in board"
+              :key="card.slug"
               class="board-card"
               :class="[`pin-${card.pin}`, { cover: card.cover }]"
               :style="{ '--rot': `${card.rotate}deg` }"
-              :href="projects[index] ? projects[index].href : '#work'"
+              :href="card.project?.href ?? '#work'"
               target="_blank"
               rel="noreferrer"
-              @click="projects[index] && handleProjectLinkClick(projects[index])"
+              @click="card.project && handleProjectLinkClick(card.project)"
             >
               <span class="board-photo"><img :src="asset(card.image)" :alt="card.caption" /></span>
               <span class="board-caption">{{ card.caption }}</span>
