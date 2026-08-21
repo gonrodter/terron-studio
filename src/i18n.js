@@ -46,7 +46,7 @@ export const messages = {
       probLeadHtml: 'Too many businesses end up with the same thing: <span class="mark">a website made from a mould.</span>',
       probNoteHtml: 'If your website looks like everyone else’s, <span class="mark green">how will people know why they should choose you?</span>',
       leadHtml: 'That is why we built <span class="brand-inline">Terron Studio</span>',
-      boardCaptions: ["Restaurant website", "Booking system", "Architecture studio website", "Campaign website"],
+      boardCaptions: ["Restaurant website", "Booking system", "Architecture studio website", "Ducati website"],
       mottoHtml: '<span class="soft">No websites churned out in bulk.</span> <span class="soft">No design that could belong to anyone…</span><br />One website made so people can <span class="mark green">find you, understand you and choose you.</span>',
     },
     work: {
@@ -304,7 +304,7 @@ export const messages = {
       probLeadHtml: 'Demasiados negocios acaban con lo mismo: <span class="mark">una web hecha con molde.</span>',
       probNoteHtml: 'Si tu web parece la de cualquier otro, <span class="mark green">¿cómo van a saber por qué elegirte?</span>',
       leadHtml: 'Por eso montamos <span class="brand-inline">Terron Studio</span>',
-      boardCaptions: ["Web para restaurante", "Sistema de reservas", "Web para estudio de arquitectura", "Web de campaña"],
+      boardCaptions: ["Web para restaurante", "Sistema de reservas", "Web para estudio de arquitectura", "Web para Ducati"],
       mottoHtml: '<span class="soft">Ni webs hechas en serie.</span> <span class="soft">Ni diseños que podrían ser de cualquiera…</span><br />Una web pensada para que te <span class="mark green">encuentren, te entiendan y te elijan.</span>',
     },
     work: {
