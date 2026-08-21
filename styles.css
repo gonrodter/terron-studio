@@ -3918,10 +3918,6 @@ h1 span {
   transform: scale(1);
 }
 
-.hero > .hero-media .hero-media-frame img {
-  transition: none;
-}
-
 .hero-image-enter-active,
 .hero-image-leave-active {
   transition: opacity 900ms ease, transform 1200ms ease;
@@ -6942,6 +6938,10 @@ body.modal-open {
   line-height: 1.12;
   letter-spacing: -0.035em;
   text-wrap: balance;
+}
+
+.pg-quote {
+  color: #9aa0a6;
 }
 
 .pg-brief em {

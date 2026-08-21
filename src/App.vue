@@ -107,10 +107,15 @@ const assetMap = {
   "aparicio-3.png": new URL("../assets/aparicio-3.webp", import.meta.url).href,
   "aparicio-4.png": new URL("../assets/aparicio-4.webp", import.meta.url).href,
   "ducati-1.png": new URL("../assets/ducati-1.webp", import.meta.url).href,
+  "pecatto-1.png": new URL("../assets/pecatto-1.webp", import.meta.url).href,
+  "pecatto-2.png": new URL("../assets/pecatto-2.webp", import.meta.url).href,
+  "pecatto-3.png": new URL("../assets/pecatto-3.webp", import.meta.url).href,
+  "pecatto-4.png": new URL("../assets/pecatto-4.webp", import.meta.url).href,
   "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
   "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
+  "pecatto.png": new URL("../assets/pecatto.webp", import.meta.url).href,
 };
 
 const asset = (file) => assetMap[file];
@@ -129,6 +134,7 @@ const imageSizeMap = {
   "burntab.png": { width: 1920, height: 966 },
   "aparicio.png": { width: 1920, height: 961 },
   "ducati.png": { width: 1920, height: 972 },
+  "pecatto.png": { width: 1920, height: 966 },
   "collecta-2.png": { width: 1920, height: 1536 },
   "collecta-3.png": { width: 1920, height: 1536 },
   "collecta-4.png": { width: 1920, height: 1536 },
@@ -139,6 +145,10 @@ const imageSizeMap = {
   "aparicio-3.png": { width: 1920, height: 1536 },
   "aparicio-4.png": { width: 1920, height: 1536 },
   "ducati-2.png": { width: 742, height: 2432 },
+  "pecatto-1.png": { width: 1920, height: 1536 },
+  "pecatto-2.png": { width: 1920, height: 1536 },
+  "pecatto-3.png": { width: 1920, height: 1536 },
+  "pecatto-4.png": { width: 1920, height: 1536 },
 };
 
 const coverSizeMap = {
@@ -146,6 +156,7 @@ const coverSizeMap = {
   "burntab.png": { width: 1440, height: 721 },
   "aparicio.png": { width: 1440, height: 725 },
   "ducati.png": { width: 1440, height: 723 },
+  "pecatto.png": { width: 1440, height: 725 },
 };
 
 const imageSize = (file) => imageSizeMap[file];
@@ -157,6 +168,7 @@ const coverMap = {
   "burntab.png": new URL("../assets/trimmed/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/trimmed/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/trimmed/ducati.webp", import.meta.url).href,
+  "pecatto.png": new URL("../assets/trimmed/pecatto.webp", import.meta.url).href,
 };
 
 // Detail galleries use the exports as they are — same size, no crop, no upscale.
@@ -165,6 +177,7 @@ const shotMap = {
   "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
+  "pecatto.png": new URL("../assets/pecatto.webp", import.meta.url).href,
   "collecta-2.png": new URL("../assets/collecta-2.webp", import.meta.url).href,
   "collecta-3.png": new URL("../assets/collecta-3.webp", import.meta.url).href,
   "collecta-4.png": new URL("../assets/collecta-4.webp", import.meta.url).href,
@@ -175,6 +188,9 @@ const shotMap = {
   "aparicio-3.png": new URL("../assets/aparicio-3.webp", import.meta.url).href,
   "aparicio-4.png": new URL("../assets/aparicio-4.webp", import.meta.url).href,
   "ducati-2.png": new URL("../assets/ducati-2.webp", import.meta.url).href,
+  "pecatto-2.png": new URL("../assets/pecatto-2.webp", import.meta.url).href,
+  "pecatto-3.png": new URL("../assets/pecatto-3.webp", import.meta.url).href,
+  "pecatto-4.png": new URL("../assets/pecatto-4.webp", import.meta.url).href,
 };
 
 const cover = (file) => coverMap[file];
@@ -400,6 +416,14 @@ const projectMeta = [
     shots: ["ducati.png", { file: "ducati-2.png", tall: true }],
   },
   {
+    slug: "pecatto-burger",
+    cover: "pecatto.png",
+    name: "Pecatto Burger",
+    href: "https://pecatto-burger-two.vercel.app/",
+    image: "pecatto-1.png",
+    shots: ["pecatto.png", "pecatto-2.png", "pecatto-3.png", "pecatto-4.png"],
+  },
+  {
     slug: "collecta",
     cover: "collecta.png",
     name: "Collecta",
@@ -533,6 +557,16 @@ const heroImageSrcset = [
   `${asset("aparicio-2.png")} 1920w`,
 ].join(", ");
 
+const heroSlides = [
+  "aparicio-2.png", "collecta.png", "pecatto-2.png", "burntab-3.png",
+  "ducati.png", "collecta-3.png", "pecatto.png", "burntab-2.png",
+  "aparicio.png", "pecatto-3.png", "aparicio-3.png", "burntab.png",
+  "aparicio-4.png", "collecta-2.png",
+];
+const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png", "pecatto.png"]);
+const heroSlide = ref(0);
+let heroTimer = null;
+
 const workSlide = ref(0);
 let workTimer = null;
 
@@ -588,7 +622,7 @@ const categories = computed(() =>
 );
 
 const boardMeta = [
-  { slug: "collecta", image: "collecta.png", pin: "red", rotate: -4 },
+  { slug: "pecatto-burger", image: "pecatto.png", pin: "red", rotate: -4 },
   { slug: "burntab", image: "burntab.png", pin: "green", rotate: 3 },
   { slug: "aparicio-alemany", image: "aparicio.png", pin: "tape", rotate: -3 },
   { slug: "ducati-w93", image: "ducati.png", pin: "clip", rotate: 1.5 },
@@ -1078,6 +1112,10 @@ onMounted(async () => {
   window.addEventListener("keydown", handleKeydown);
   window.addEventListener("popstate", handlePopState);
 
+  heroTimer = window.setInterval(() => {
+    heroSlide.value = (heroSlide.value + 1) % heroSlides.length;
+  }, 3200);
+
   workTimer = window.setInterval(workAdvance, 4600);
 
   syncSeoMeta();
@@ -1098,6 +1136,7 @@ onBeforeUnmount(() => {
   projectsListObserver?.disconnect();
   projectShotsObserver?.disconnect();
   if (companyLogosAnimationTimer) window.clearTimeout(companyLogosAnimationTimer);
+  if (heroTimer) window.clearInterval(heroTimer);
   if (workTimer) window.clearInterval(workTimer);
   if (categoryMagnetFrame) cancelAnimationFrame(categoryMagnetFrame);
   document.body.classList.remove("mobile-menu-open");
@@ -1300,16 +1339,18 @@ const vTilt = {
           <div class="hero-media" role="img" aria-label="Selected work preview">
             <div class="hero-media-frame">
               <img
-                class="is-active"
-                :src="heroImage"
-                :srcset="heroImageSrcset"
-                sizes="(max-width: 820px) calc(70vw - 31px), 605px"
+                v-for="(slide, index) in heroSlides"
+                :key="slide"
+                :class="{ 'is-active': heroSlide === index, zoom: heroZoomShots.has(slide) }"
+                :src="index === 0 ? heroImage : asset(slide)"
+                :srcset="index === 0 ? heroImageSrcset : undefined"
+                :sizes="index === 0 ? '(max-width: 820px) calc(70vw - 31px), 605px' : undefined"
                 width="1200"
                 height="960"
                 alt=""
                 aria-hidden="true"
-                loading="eager"
-                fetchpriority="high"
+                :loading="index === 0 ? 'eager' : 'lazy'"
+                :fetchpriority="index === 0 ? 'high' : 'auto'"
                 decoding="async"
               />
               <div class="hero-media-glow"></div>
@@ -1729,10 +1770,7 @@ const vTilt = {
 
             <blockquote class="pg-brief">
               <p>
-                {{ activeProject.brief.start }}
-                <em>{{ activeProject.brief.emphasis }}</em>
-                {{ activeProject.brief.end }}
-                <span v-if="activeProject.brief.brand" class="pg-brief-brand">{{ activeProject.brief.brand }}</span>
+                <span class="pg-quote" aria-hidden="true">“</span>{{ activeProject.brief.start }} <em>{{ activeProject.brief.emphasis }}</em> {{ activeProject.brief.end }}<span v-if="activeProject.brief.brand" class="pg-brief-brand"> {{ activeProject.brief.brand }}</span><span class="pg-quote" aria-hidden="true">”</span>
               </p>
             </blockquote>
 

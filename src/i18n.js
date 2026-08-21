@@ -46,7 +46,7 @@ export const messages = {
       probLeadHtml: 'Too many businesses end up with the same thing: <span class="mark">a website made from a mould.</span>',
       probNoteHtml: 'If your website looks like everyone else’s, <span class="mark green">how will people know why they should choose you?</span>',
       leadHtml: 'That is why we built <span class="brand-inline">Terron Studio</span>',
-      boardCaptions: ["Mobile experience", "Desktop experience", "Architecture studio website", "Campaign website"],
+      boardCaptions: ["Restaurant website", "Desktop experience", "Architecture studio website", "Campaign website"],
       mottoHtml: '<span class="soft">No websites churned out in bulk.</span> <span class="soft">No design that could belong to anyone…</span><br />One website made so people can <span class="mark green">find you, understand you and choose you.</span>',
     },
     work: {
@@ -55,6 +55,7 @@ export const messages = {
       projectAlts: [
         "Aparicio & Alemany architecture studio website screenshot",
         "Ducati W93 contest website screenshot",
+        "Pecatto Burger restaurant website screenshot",
         "Collecta website screenshot",
         "BurnTab website screenshot",
         "PowerPool website screenshot",
@@ -74,6 +75,10 @@ export const messages = {
         "ducati-w93": {
           title: "Ducati W93: campaign landing page | Terron Studio",
           description: "Landing page designed and developed for the Ducati W93 competition, with every step presented clearly in a direct, visual experience.",
+        },
+        "pecatto-burger": {
+          title: "Pecatto Burger: restaurant website | Terron Studio",
+          description: "Custom website design and development for Pecatto Burger, built to show the menu, the place and how to order in a direct, appetising way.",
         },
         collecta: {
           title: "Collecta: mobile app design and development | Terron Studio",
@@ -102,6 +107,11 @@ export const messages = {
           emphasis: "a showcase for our projects",
           end: "and present what we can do in a unique, uncommon way.",
         },
+        "pecatto-burger": {
+          start: "We wanted an elegant website that still kept",
+          emphasis: "the cheeky, sexy essence of the brand,",
+          end: "and made you hungry at first sight.",
+        },
         "ducati-w93": {
           start: "We needed a landing page for a giveaway,",
           emphasis: "with no scrolling and every step clear at first glance,",
@@ -113,6 +123,7 @@ export const messages = {
         burntab: "macOS App",
         "aparicio-alemany": "Website",
         "ducati-w93": "Website",
+        "pecatto-burger": "Restaurant website",
       },
     },
     categories: ["Custom design", "Web development", "SEO-ready", "Mobile-first", "Booking systems", "See all Projects"],
@@ -276,7 +287,7 @@ export const messages = {
       probLeadHtml: 'Demasiados negocios acaban con lo mismo: <span class="mark">una web hecha con molde.</span>',
       probNoteHtml: 'Si tu web parece la de cualquier otro, <span class="mark green">¿cómo van a saber por qué elegirte?</span>',
       leadHtml: 'Por eso montamos <span class="brand-inline">Terron Studio</span>',
-      boardCaptions: ["Experiencia móvil", "Experiencia de escritorio", "Web para estudio de arquitectura", "Web de campaña"],
+      boardCaptions: ["Web para restaurante", "Experiencia de escritorio", "Web para estudio de arquitectura", "Web de campaña"],
       mottoHtml: '<span class="soft">Ni webs hechas en serie.</span> <span class="soft">Ni diseños que podrían ser de cualquiera…</span><br />Una web pensada para que te <span class="mark green">encuentren, te entiendan y te elijan.</span>',
     },
     work: {
@@ -285,6 +296,7 @@ export const messages = {
       projectAlts: [
         "Captura de la web del estudio de arquitectura Aparicio & Alemany",
         "Captura de la web del concurso Ducati W93",
+        "Captura de la web del restaurante Pecatto Burger",
         "Captura de la web de Collecta",
         "Captura de la web de BurnTab",
         "Captura de la web de PowerPool",
@@ -304,6 +316,10 @@ export const messages = {
         "ducati-w93": {
           title: "Ducati W93: landing page de campaña | Terron Studio",
           description: "Landing page diseñada y desarrollada para el concurso Ducati W93, con todos los pasos claros dentro de una experiencia directa y visual.",
+        },
+        "pecatto-burger": {
+          title: "Pecatto Burger: web para restaurante | Terron Studio",
+          description: "Diseño y desarrollo de una web a medida para Pecatto Burger, pensada para enseñar la carta, el local y cómo pedir de forma directa y apetecible.",
         },
         collecta: {
           title: "Collecta: diseño y desarrollo de app móvil | Terron Studio",
@@ -332,6 +348,11 @@ export const messages = {
           emphasis: "escaparate de nuestros proyectos",
           end: "y mostrase lo que sabemos hacer de una forma única y poco común.",
         },
+        "pecatto-burger": {
+          start: "Queríamos una web elegante que no perdiese",
+          emphasis: "la esencia gamberra y sexy de la marca,",
+          end: "y que diese hambre solo con verla.",
+        },
         "ducati-w93": {
           start: "Necesitábamos una landing para un sorteo,",
           emphasis: "sin scroll y con todos los pasos claros a primera vista,",
@@ -343,6 +364,7 @@ export const messages = {
         burntab: "App de macOS",
         "aparicio-alemany": "Página web",
         "ducati-w93": "Página web",
+        "pecatto-burger": "Web para restaurante",
       },
     },
     categories: ["Diseño a medida", "Desarrollo web", "Preparada para SEO", "Pensada para móvil", "Sistema de reservas", "Ver todos los proyectos"],

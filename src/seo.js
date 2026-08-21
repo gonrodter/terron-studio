@@ -8,6 +8,7 @@ const CONTENT_ROUTES = [
   "/projects",
   "/projects/aparicio-alemany",
   "/projects/ducati-w93",
+  "/projects/pecatto-burger",
   "/projects/collecta",
   "/projects/burntab",
 ];
@@ -29,17 +30,23 @@ const projectData = {
     lcpImageSource: "assets/ducati.webp",
     imageAltIndex: 1,
   },
+  "pecatto-burger": {
+    name: "Pecatto Burger",
+    imageSource: "assets/pecatto-1.webp",
+    lcpImageSource: "assets/pecatto.webp",
+    imageAltIndex: 2,
+  },
   collecta: {
     name: "Collecta",
     imageSource: "assets/collecta-1.webp",
     lcpImageSource: "assets/collecta.webp",
-    imageAltIndex: 2,
+    imageAltIndex: 3,
   },
   burntab: {
     name: "BurnTab",
     imageSource: "assets/burntab-1.webp",
     lcpImageSource: "assets/burntab.webp",
-    imageAltIndex: 3,
+    imageAltIndex: 4,
   },
 };
 
