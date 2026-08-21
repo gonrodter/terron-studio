@@ -42,6 +42,22 @@
       "destination": "/en/projects/ducati-w93/index.html"
     },
     {
+      "source": "/es/projects/pecatto-burger",
+      "destination": "/es/projects/pecatto-burger/index.html"
+    },
+    {
+      "source": "/en/projects/pecatto-burger",
+      "destination": "/en/projects/pecatto-burger/index.html"
+    },
+    {
+      "source": "/es/projects/reservas",
+      "destination": "/es/projects/reservas/index.html"
+    },
+    {
+      "source": "/en/projects/reservas",
+      "destination": "/en/projects/reservas/index.html"
+    },
+    {
       "source": "/es/projects/collecta",
       "destination": "/es/projects/collecta/index.html"
     },

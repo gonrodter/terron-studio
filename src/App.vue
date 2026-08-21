@@ -110,11 +110,15 @@ const assetMap = {
   "pecatto-1.png": new URL("../assets/pecatto-1.webp", import.meta.url).href,
   "pecatto-2.png": new URL("../assets/pecatto-2.webp", import.meta.url).href,
   "pecatto-3.png": new URL("../assets/pecatto-3.webp", import.meta.url).href,
+  "reservas-1.png": new URL("../assets/reservas-1.webp", import.meta.url).href,
+  "reservas-2.png": new URL("../assets/reservas-2.webp", import.meta.url).href,
+  "reservas-3.png": new URL("../assets/reservas-3.webp", import.meta.url).href,
   "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
   "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
   "pecatto.png": new URL("../assets/pecatto.webp", import.meta.url).href,
+  "reservas.png": new URL("../assets/reservas.webp", import.meta.url).href,
 };
 
 const asset = (file) => assetMap[file];
@@ -133,7 +137,8 @@ const imageSizeMap = {
   "burntab.png": { width: 1920, height: 966 },
   "aparicio.png": { width: 1920, height: 961 },
   "ducati.png": { width: 1920, height: 972 },
-  "pecatto.png": { width: 1920, height: 966 },
+  "pecatto.png": { width: 1920, height: 973 },
+  "reservas.png": { width: 1920, height: 975 },
   "collecta-2.png": { width: 1920, height: 1536 },
   "collecta-3.png": { width: 1920, height: 1536 },
   "collecta-4.png": { width: 1920, height: 1536 },
@@ -147,6 +152,9 @@ const imageSizeMap = {
   "pecatto-1.png": { width: 1920, height: 1536 },
   "pecatto-2.png": { width: 1920, height: 1536 },
   "pecatto-3.png": { width: 1920, height: 1536 },
+  "reservas-1.png": { width: 1920, height: 1536 },
+  "reservas-2.png": { width: 1920, height: 1536 },
+  "reservas-3.png": { width: 1920, height: 1536 },
 };
 
 const coverSizeMap = {
@@ -154,7 +162,8 @@ const coverSizeMap = {
   "burntab.png": { width: 1440, height: 721 },
   "aparicio.png": { width: 1440, height: 725 },
   "ducati.png": { width: 1440, height: 723 },
-  "pecatto.png": { width: 1440, height: 725 },
+  "pecatto.png": { width: 1440, height: 729 },
+  "reservas.png": { width: 1440, height: 730 },
 };
 
 const imageSize = (file) => imageSizeMap[file];
@@ -167,6 +176,7 @@ const coverMap = {
   "aparicio.png": new URL("../assets/trimmed/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/trimmed/ducati.webp", import.meta.url).href,
   "pecatto.png": new URL("../assets/trimmed/pecatto.webp", import.meta.url).href,
+  "reservas.png": new URL("../assets/trimmed/reservas.webp", import.meta.url).href,
 };
 
 // Detail galleries use the exports as they are — same size, no crop, no upscale.
@@ -176,6 +186,7 @@ const shotMap = {
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
   "ducati.png": new URL("../assets/ducati.webp", import.meta.url).href,
   "pecatto.png": new URL("../assets/pecatto.webp", import.meta.url).href,
+  "reservas.png": new URL("../assets/reservas.webp", import.meta.url).href,
   "collecta-2.png": new URL("../assets/collecta-2.webp", import.meta.url).href,
   "collecta-3.png": new URL("../assets/collecta-3.webp", import.meta.url).href,
   "collecta-4.png": new URL("../assets/collecta-4.webp", import.meta.url).href,
@@ -189,6 +200,9 @@ const shotMap = {
   "pecatto-1.png": new URL("../assets/pecatto-1.webp", import.meta.url).href,
   "pecatto-2.png": new URL("../assets/pecatto-2.webp", import.meta.url).href,
   "pecatto-3.png": new URL("../assets/pecatto-3.webp", import.meta.url).href,
+  "reservas-1.png": new URL("../assets/reservas-1.webp", import.meta.url).href,
+  "reservas-2.png": new URL("../assets/reservas-2.webp", import.meta.url).href,
+  "reservas-3.png": new URL("../assets/reservas-3.webp", import.meta.url).href,
 };
 
 const cover = (file) => coverMap[file];
@@ -422,6 +436,14 @@ const projectMeta = [
     shots: ["pecatto.png", "pecatto-1.png", "pecatto-2.png", "pecatto-3.png"],
   },
   {
+    slug: "reservas",
+    cover: "reservas.png",
+    name: "Sistema de reservas by Terron Studio",
+    href: "https://reservations.terron-studio.com/",
+    image: "reservas-1.png",
+    shots: ["reservas.png", "reservas-1.png", "reservas-2.png", "reservas-3.png"],
+  },
+  {
     slug: "collecta",
     cover: "collecta.png",
     name: "Collecta",
@@ -440,22 +462,29 @@ const projectMeta = [
 ];
 
 const projects = computed(() =>
-  projectMeta.map((p, i) => ({ ...p, alt: t.value.work.projectAlts[i] }))
+  projectMeta.map((p, i) => ({
+    ...p,
+    name: t.value.projectsPage.names[p.slug] ?? p.name,
+    alt: t.value.work.projectAlts[i],
+  }))
 );
 
 const projectPages = computed(() =>
   projectMeta.map((p, i) => ({
     ...p,
+    name: t.value.projectsPage.names[p.slug] ?? p.name,
+    detailName: t.value.projectsPage.detailNames[p.slug] ?? t.value.projectsPage.names[p.slug] ?? p.name,
     projectPath: `/${lang.value}/projects/${p.slug}`,
     alt: t.value.work.projectAlts[i],
     tag: t.value.projectsPage.tags[p.slug],
     brief: t.value.projectsPage.briefs[p.slug],
     seo: t.value.projectsPage.seo[p.slug],
-    shots: p.shots.map((shot, si) =>
-      typeof shot === "string"
-        ? { file: shot, tall: false, alt: `${p.name} — ${si + 1}` }
-        : { ...shot, alt: `${p.name} — ${si + 1}` }
-    ),
+    shots: p.shots.map((shot, si) => {
+      const name = t.value.projectsPage.names[p.slug] ?? p.name;
+      return typeof shot === "string"
+        ? { file: shot, tall: false, alt: `${name} — ${si + 1}` }
+        : { ...shot, alt: `${name} — ${si + 1}` };
+    }),
   }))
 );
 
@@ -556,12 +585,13 @@ const heroImageSrcset = [
 ].join(", ");
 
 const heroSlides = [
-  "aparicio-2.png", "collecta.png", "pecatto-2.png", "burntab-3.png",
-  "ducati.png", "collecta-3.png", "pecatto.png", "burntab-2.png",
-  "aparicio.png", "pecatto-3.png", "aparicio-3.png", "burntab.png",
-  "aparicio-4.png", "collecta-2.png",
+  "aparicio-2.png", "collecta.png", "reservas-1.png", "pecatto-2.png",
+  "burntab-3.png", "ducati.png", "reservas.png", "collecta-3.png",
+  "pecatto.png", "burntab-2.png", "aparicio.png", "reservas-2.png",
+  "pecatto-3.png", "aparicio-3.png", "burntab.png", "aparicio-4.png",
+  "collecta-2.png",
 ];
-const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png", "pecatto.png"]);
+const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png", "pecatto.png", "reservas.png"]);
 const heroSlide = ref(0);
 let heroTimer = null;
 
@@ -621,7 +651,7 @@ const categories = computed(() =>
 
 const boardMeta = [
   { slug: "pecatto-burger", image: "pecatto.png", pin: "red", rotate: -4 },
-  { slug: "burntab", image: "burntab.png", pin: "green", rotate: 3 },
+  { slug: "reservas", image: "reservas.png", pin: "green", rotate: 3 },
   { slug: "aparicio-alemany", image: "aparicio.png", pin: "tape", rotate: -3 },
   { slug: "ducati-w93", image: "ducati.png", pin: "clip", rotate: 1.5 },
 ];
@@ -1749,7 +1779,7 @@ const vTilt = {
                 </svg>
               </a>
               <h1 class="pg-title-wrap">
-                <span class="pg-title">{{ activeProject.name }}</span>
+                <span class="pg-title">{{ activeProject.detailName }}</span>
                 <span class="pg-subtitle">{{ activeProject.tag }}</span>
               </h1>
               <a
@@ -1768,7 +1798,7 @@ const vTilt = {
 
             <blockquote class="pg-brief">
               <p>
-                <span class="pg-quote" aria-hidden="true">“</span>{{ activeProject.brief.start }} <em>{{ activeProject.brief.emphasis }}</em> {{ activeProject.brief.end }}<span v-if="activeProject.brief.brand" class="pg-brief-brand"> {{ activeProject.brief.brand }}</span><span class="pg-quote" aria-hidden="true">”</span>
+                <span class="pg-quote" aria-hidden="true">“</span>{{ activeProject.brief.start }} <em>{{ activeProject.brief.emphasis }}</em> {{ activeProject.brief.end }}<span v-if="activeProject.brief.brand" class="pg-brief-brand">{{ " " + activeProject.brief.brand }}</span><span class="pg-quote" aria-hidden="true">”</span>
               </p>
             </blockquote>
 

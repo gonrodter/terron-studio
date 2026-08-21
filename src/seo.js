@@ -9,6 +9,7 @@ const CONTENT_ROUTES = [
   "/projects/aparicio-alemany",
   "/projects/ducati-w93",
   "/projects/pecatto-burger",
+  "/projects/reservas",
   "/projects/collecta",
   "/projects/burntab",
 ];
@@ -36,17 +37,23 @@ const projectData = {
     lcpImageSource: "assets/pecatto.webp",
     imageAltIndex: 2,
   },
+  reservas: {
+    name: "Sistema de reservas by Terron Studio",
+    imageSource: "assets/reservas-1.webp",
+    lcpImageSource: "assets/reservas.webp",
+    imageAltIndex: 3,
+  },
   collecta: {
     name: "Collecta",
     imageSource: "assets/collecta-1.webp",
     lcpImageSource: "assets/collecta.webp",
-    imageAltIndex: 3,
+    imageAltIndex: 4,
   },
   burntab: {
     name: "BurnTab",
     imageSource: "assets/burntab-1.webp",
     lcpImageSource: "assets/burntab.webp",
-    imageAltIndex: 4,
+    imageAltIndex: 5,
   },
 };
 
@@ -87,7 +94,7 @@ export function getRouteSeo(path, localeOverride) {
       lcpImageSource: project.lcpImageSource,
       imageAlt: copy.work.projectAlts[project.imageAltIndex],
       type: "CreativeWork",
-      name: project.name,
+      name: copy.projectsPage.names[slug] ?? project.name,
       locale,
       alternates,
     };

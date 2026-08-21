@@ -46,7 +46,7 @@ export const messages = {
       probLeadHtml: 'Too many businesses end up with the same thing: <span class="mark">a website made from a mould.</span>',
       probNoteHtml: 'If your website looks like everyone else’s, <span class="mark green">how will people know why they should choose you?</span>',
       leadHtml: 'That is why we built <span class="brand-inline">Terron Studio</span>',
-      boardCaptions: ["Restaurant website", "Desktop experience", "Architecture studio website", "Campaign website"],
+      boardCaptions: ["Restaurant website", "Booking system", "Architecture studio website", "Campaign website"],
       mottoHtml: '<span class="soft">No websites churned out in bulk.</span> <span class="soft">No design that could belong to anyone…</span><br />One website made so people can <span class="mark green">find you, understand you and choose you.</span>',
     },
     work: {
@@ -56,6 +56,7 @@ export const messages = {
         "Aparicio & Alemany architecture studio website screenshot",
         "Ducati W93 contest website screenshot",
         "Pecatto Burger restaurant website screenshot",
+        "Terron Studio booking system screenshot",
         "Collecta website screenshot",
         "BurnTab website screenshot",
         "PowerPool website screenshot",
@@ -79,6 +80,10 @@ export const messages = {
         "pecatto-burger": {
           title: "Pecatto Burger: restaurant website | Terron Studio",
           description: "Custom website design and development for Pecatto Burger, built to show the menu, the place and how to order in a direct, appetising way.",
+        },
+        reservas: {
+          title: "Booking system for restaurants | Terron Studio",
+          description: "The booking system built by Terron Studio so restaurants can manage tables, schedules and reservations from a single place.",
         },
         collecta: {
           title: "Collecta: mobile app design and development | Terron Studio",
@@ -112,6 +117,11 @@ export const messages = {
           emphasis: "the cheeky, sexy essence of the brand,",
           end: "and made you hungry at first sight.",
         },
+        reservas: {
+          start: "We saw our clients needed",
+          emphasis: "a booking system,",
+          end: "so we went ahead and built it.",
+        },
         "ducati-w93": {
           start: "We needed a landing page for a giveaway,",
           emphasis: "with no scrolling and every step clear at first glance,",
@@ -124,6 +134,13 @@ export const messages = {
         "aparicio-alemany": "Website",
         "ducati-w93": "Website",
         "pecatto-burger": "Restaurant website",
+        reservas: "by Terron Studio",
+      },
+      names: {
+        reservas: "Booking system by Terron Studio",
+      },
+      detailNames: {
+        reservas: "Booking system",
       },
     },
     categories: ["Custom design", "Web development", "SEO-ready", "Mobile-first", "Booking systems", "See all Projects"],
@@ -287,7 +304,7 @@ export const messages = {
       probLeadHtml: 'Demasiados negocios acaban con lo mismo: <span class="mark">una web hecha con molde.</span>',
       probNoteHtml: 'Si tu web parece la de cualquier otro, <span class="mark green">¿cómo van a saber por qué elegirte?</span>',
       leadHtml: 'Por eso montamos <span class="brand-inline">Terron Studio</span>',
-      boardCaptions: ["Web para restaurante", "Experiencia de escritorio", "Web para estudio de arquitectura", "Web de campaña"],
+      boardCaptions: ["Web para restaurante", "Sistema de reservas", "Web para estudio de arquitectura", "Web de campaña"],
       mottoHtml: '<span class="soft">Ni webs hechas en serie.</span> <span class="soft">Ni diseños que podrían ser de cualquiera…</span><br />Una web pensada para que te <span class="mark green">encuentren, te entiendan y te elijan.</span>',
     },
     work: {
@@ -297,6 +314,7 @@ export const messages = {
         "Captura de la web del estudio de arquitectura Aparicio & Alemany",
         "Captura de la web del concurso Ducati W93",
         "Captura de la web del restaurante Pecatto Burger",
+        "Captura del sistema de reservas de Terron Studio",
         "Captura de la web de Collecta",
         "Captura de la web de BurnTab",
         "Captura de la web de PowerPool",
@@ -320,6 +338,10 @@ export const messages = {
         "pecatto-burger": {
           title: "Pecatto Burger: web para restaurante | Terron Studio",
           description: "Diseño y desarrollo de una web a medida para Pecatto Burger, pensada para enseñar la carta, el local y cómo pedir de forma directa y apetecible.",
+        },
+        reservas: {
+          title: "Sistema de reservas para restaurantes | Terron Studio",
+          description: "El sistema de reservas creado por Terron Studio para que los restaurantes gestionen mesas, horarios y reservas desde un solo sitio.",
         },
         collecta: {
           title: "Collecta: diseño y desarrollo de app móvil | Terron Studio",
@@ -353,6 +375,11 @@ export const messages = {
           emphasis: "la esencia gamberra y sexy de la marca,",
           end: "y que diese hambre solo con verla.",
         },
+        reservas: {
+          start: "Vimos que nuestros clientes necesitaban",
+          emphasis: "un sistema de reservas,",
+          end: "así que lo llevamos a cabo.",
+        },
         "ducati-w93": {
           start: "Necesitábamos una landing para un sorteo,",
           emphasis: "sin scroll y con todos los pasos claros a primera vista,",
@@ -365,6 +392,13 @@ export const messages = {
         "aparicio-alemany": "Página web",
         "ducati-w93": "Página web",
         "pecatto-burger": "Web para restaurante",
+        reservas: "by Terron Studio",
+      },
+      names: {
+        reservas: "Sistema de reservas by Terron Studio",
+      },
+      detailNames: {
+        reservas: "Sistema de reservas",
       },
     },
     categories: ["Diseño a medida", "Desarrollo web", "Preparada para SEO", "Pensada para móvil", "Sistema de reservas", "Ver todos los proyectos"],
