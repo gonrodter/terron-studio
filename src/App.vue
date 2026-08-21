@@ -110,7 +110,6 @@ const assetMap = {
   "pecatto-1.png": new URL("../assets/pecatto-1.webp", import.meta.url).href,
   "pecatto-2.png": new URL("../assets/pecatto-2.webp", import.meta.url).href,
   "pecatto-3.png": new URL("../assets/pecatto-3.webp", import.meta.url).href,
-  "pecatto-4.png": new URL("../assets/pecatto-4.webp", import.meta.url).href,
   "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
   "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
@@ -148,7 +147,6 @@ const imageSizeMap = {
   "pecatto-1.png": { width: 1920, height: 1536 },
   "pecatto-2.png": { width: 1920, height: 1536 },
   "pecatto-3.png": { width: 1920, height: 1536 },
-  "pecatto-4.png": { width: 1920, height: 1536 },
 };
 
 const coverSizeMap = {
@@ -188,9 +186,9 @@ const shotMap = {
   "aparicio-3.png": new URL("../assets/aparicio-3.webp", import.meta.url).href,
   "aparicio-4.png": new URL("../assets/aparicio-4.webp", import.meta.url).href,
   "ducati-2.png": new URL("../assets/ducati-2.webp", import.meta.url).href,
+  "pecatto-1.png": new URL("../assets/pecatto-1.webp", import.meta.url).href,
   "pecatto-2.png": new URL("../assets/pecatto-2.webp", import.meta.url).href,
   "pecatto-3.png": new URL("../assets/pecatto-3.webp", import.meta.url).href,
-  "pecatto-4.png": new URL("../assets/pecatto-4.webp", import.meta.url).href,
 };
 
 const cover = (file) => coverMap[file];
@@ -421,7 +419,7 @@ const projectMeta = [
     name: "Pecatto Burger",
     href: "https://pecatto-burger-two.vercel.app/",
     image: "pecatto-1.png",
-    shots: ["pecatto.png", "pecatto-2.png", "pecatto-3.png", "pecatto-4.png"],
+    shots: ["pecatto.png", "pecatto-1.png", "pecatto-2.png", "pecatto-3.png"],
   },
   {
     slug: "collecta",
