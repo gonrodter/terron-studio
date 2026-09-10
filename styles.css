@@ -7060,6 +7060,10 @@ body.modal-open {
   margin-top: 2px;
 }
 
+.pg-detail.is-the-vegan-roll .pg-shot-item:last-child {
+  margin-top: -3%;
+}
+
 .pg-shot-item.is-tall {
   margin-top: 6%;
 }

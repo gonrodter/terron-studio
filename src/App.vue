@@ -1882,7 +1882,12 @@ const vTilt = {
           </div>
 
           <!-- DETAIL -->
-          <div v-else :key="activeProject.slug" class="pg-detail" :class="{ 'is-ducati': activeProject.slug === 'ducati-w93' }">
+          <div
+            v-else
+            :key="activeProject.slug"
+            class="pg-detail"
+            :class="[`is-${activeProject.slug}`, { 'is-ducati': activeProject.slug === 'ducati-w93' }]"
+          >
             <header class="pg-detail-head">
               <a
                 :href="projectsPath"
