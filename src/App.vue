@@ -570,7 +570,7 @@ const projects = computed(() =>
       name: t.value.projectsPage.names[p.slug] ?? p.name,
       alt: t.value.work.projectAlts[i],
     }))
-    .filter((p) => p.cover)
+    .filter((p) => p.cover && !["locura-burger", "platypool"].includes(p.slug))
 );
 
 const projectPages = computed(() =>
@@ -690,10 +690,9 @@ const heroImageSrcset = [
 
 const heroSlides = [
   "aparicio-2.png", "collecta.png", "reservas-1.png", "pecatto-2.png",
-  "burntab-3.png", "ducati.png", "reservas.png", "collecta-3.png",
-  "pecatto.png", "burntab-2.png", "aparicio.png", "reservas-2.png",
+  "vegan-roll-2.png", "ducati.png", "locura-2.png", "reservas.png",
+  "platypool-3.png", "pecatto.png", "aparicio.png", "reservas-2.png",
   "pecatto-3.png", "aparicio-3.png", "burntab.png", "aparicio-4.png",
-  "collecta-2.png",
 ];
 const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png", "pecatto.png", "reservas.png"]);
 const heroSlide = ref(0);
