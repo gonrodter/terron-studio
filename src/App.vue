@@ -690,11 +690,12 @@ const heroImageSrcset = [
 
 const heroSlides = [
   "aparicio-2.png", "collecta.png", "reservas-1.png", "pecatto-2.png",
-  "vegan-roll-2.png", "ducati.png", "locura-2.png", "reservas.png",
-  "platypool-3.png", "pecatto.png", "aparicio.png", "reservas-2.png",
-  "pecatto-3.png", "aparicio-3.png", "burntab.png", "aparicio-4.png",
+  "vegan-roll.png", "ducati.png", "locura-2.png", "reservas.png",
+  "platypool-3.png", "pecatto.png", "vegan-roll-1.png", "aparicio.png",
+  "reservas-2.png", "pecatto-3.png", "aparicio-3.png", "vegan-roll-2.png",
+  "burntab.png", "aparicio-4.png",
 ];
-const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png", "pecatto.png", "reservas.png"]);
+const heroZoomShots = new Set(["collecta.png", "burntab.png", "aparicio.png", "ducati.png", "pecatto.png", "reservas.png", "vegan-roll.png"]);
 const heroSlide = ref(0);
 let heroTimer = null;
 
