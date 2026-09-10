@@ -58,10 +58,10 @@ function syncSeoMeta() {
   const project = activeProject.value;
   const seo = getRouteSeo(window.location.pathname, lang.value);
   const canonicalUrl = new URL(seo.canonicalPath, SITE_ORIGIN).href;
-  const projectImagePath = project
+  const projectImagePath = project?.image
     ? new URL(asset(project.image), window.location.origin).pathname
     : null;
-  const image = project ? new URL(projectImagePath, SITE_ORIGIN).href : `${SITE_ORIGIN}/og.png`;
+  const image = projectImagePath ? new URL(projectImagePath, SITE_ORIGIN).href : `${SITE_ORIGIN}/og.png`;
 
   document.documentElement.lang = lang.value;
   document.title = seo.title;
@@ -77,9 +77,9 @@ function syncSeoMeta() {
   setHeadMeta('meta[property="og:locale:alternate"]', "content", lang.value === "es" ? "en_US" : "es_ES");
   setHeadMeta('meta[property="og:image"]', "content", image);
   setHeadMeta('meta[property="og:image:alt"]', "content", project ? project.alt : seo.imageAlt);
-  setHeadMeta('meta[property="og:image:type"]', "content", project ? "image/webp" : "image/png");
-  setHeadMeta('meta[property="og:image:width"]', "content", project ? "1920" : "1200");
-  setHeadMeta('meta[property="og:image:height"]', "content", project ? "1536" : "630");
+  setHeadMeta('meta[property="og:image:type"]', "content", projectImagePath ? "image/webp" : "image/png");
+  setHeadMeta('meta[property="og:image:width"]', "content", projectImagePath ? "1920" : "1200");
+  setHeadMeta('meta[property="og:image:height"]', "content", projectImagePath ? "1536" : "630");
   setHeadMeta('meta[name="twitter:title"]', "content", seo.title);
   setHeadMeta('meta[name="twitter:description"]', "content", seo.description);
   setHeadMeta('meta[name="twitter:image"]', "content", image);
@@ -113,6 +113,24 @@ const assetMap = {
   "reservas-1.png": new URL("../assets/reservas-1.webp", import.meta.url).href,
   "reservas-2.png": new URL("../assets/reservas-2.webp", import.meta.url).href,
   "reservas-3.png": new URL("../assets/reservas-3.webp", import.meta.url).href,
+  "vegan-roll.png": new URL("../assets/vegan-roll.webp", import.meta.url).href,
+  "vegan-roll-project.png": new URL("../assets/vegan-roll-project.webp", import.meta.url).href,
+  "vegan-roll-1.png": new URL("../assets/vegan-roll-1.webp", import.meta.url).href,
+  "vegan-roll-2.png": new URL("../assets/vegan-roll-2.webp", import.meta.url).href,
+  "vegan-roll-3.png": new URL("../assets/vegan-roll-3.webp", import.meta.url).href,
+  "vegan-roll-4.png": new URL("../assets/vegan-roll-4.webp", import.meta.url).href,
+  "locura.png": new URL("../assets/locura.webp", import.meta.url).href,
+  "locura-project.png": new URL("../assets/locura-project.webp", import.meta.url).href,
+  "locura-1.png": new URL("../assets/locura-1.webp", import.meta.url).href,
+  "locura-2.png": new URL("../assets/locura-2.webp", import.meta.url).href,
+  "locura-3.png": new URL("../assets/locura-3.webp", import.meta.url).href,
+  "locura-4.png": new URL("../assets/locura-4.webp", import.meta.url).href,
+  "platypool.png": new URL("../assets/platypool.webp", import.meta.url).href,
+  "platypool-project.png": new URL("../assets/platypool-project.webp", import.meta.url).href,
+  "platypool-1.png": new URL("../assets/platypool-1.webp", import.meta.url).href,
+  "platypool-2.png": new URL("../assets/platypool-2.webp", import.meta.url).href,
+  "platypool-3.png": new URL("../assets/platypool-3.webp", import.meta.url).href,
+  "platypool-4.png": new URL("../assets/platypool-4.webp", import.meta.url).href,
   "collecta.png": new URL("../assets/collecta.webp", import.meta.url).href,
   "burntab.png": new URL("../assets/burntab.webp", import.meta.url).href,
   "aparicio.png": new URL("../assets/aparicio.webp", import.meta.url).href,
@@ -155,6 +173,24 @@ const imageSizeMap = {
   "reservas-1.png": { width: 1920, height: 1536 },
   "reservas-2.png": { width: 1920, height: 1536 },
   "reservas-3.png": { width: 1920, height: 1536 },
+  "vegan-roll.png": { width: 1920, height: 966 },
+  "vegan-roll-project.png": { width: 1920, height: 1205 },
+  "vegan-roll-1.png": { width: 1920, height: 1536 },
+  "vegan-roll-2.png": { width: 1920, height: 1536 },
+  "vegan-roll-3.png": { width: 1920, height: 1536 },
+  "vegan-roll-4.png": { width: 1920, height: 1019 },
+  "locura.png": { width: 1920, height: 1536 },
+  "locura-project.png": { width: 1920, height: 1207 },
+  "locura-1.png": { width: 1920, height: 1536 },
+  "locura-2.png": { width: 1920, height: 1536 },
+  "locura-3.png": { width: 1920, height: 1536 },
+  "locura-4.png": { width: 1920, height: 1536 },
+  "platypool.png": { width: 1920, height: 1536 },
+  "platypool-project.png": { width: 1920, height: 942 },
+  "platypool-1.png": { width: 1920, height: 1536 },
+  "platypool-2.png": { width: 1920, height: 1536 },
+  "platypool-3.png": { width: 1920, height: 1536 },
+  "platypool-4.png": { width: 1920, height: 1536 },
 };
 
 const coverSizeMap = {
@@ -164,6 +200,9 @@ const coverSizeMap = {
   "ducati.png": { width: 1440, height: 723 },
   "pecatto.png": { width: 1440, height: 729 },
   "reservas.png": { width: 1440, height: 730 },
+  "vegan-roll.png": { width: 1440, height: 720 },
+  "locura.png": { width: 1440, height: 720 },
+  "platypool.png": { width: 1440, height: 720 },
 };
 
 const imageSize = (file) => imageSizeMap[file];
@@ -177,6 +216,9 @@ const coverMap = {
   "ducati.png": new URL("../assets/trimmed/ducati.webp", import.meta.url).href,
   "pecatto.png": new URL("../assets/trimmed/pecatto.webp", import.meta.url).href,
   "reservas.png": new URL("../assets/trimmed/reservas.webp", import.meta.url).href,
+  "vegan-roll.png": new URL("../assets/trimmed/vegan-roll.webp", import.meta.url).href,
+  "locura.png": new URL("../assets/trimmed/locura.webp", import.meta.url).href,
+  "platypool.png": new URL("../assets/trimmed/platypool.webp", import.meta.url).href,
 };
 
 // Detail galleries use the exports as they are — same size, no crop, no upscale.
@@ -203,6 +245,24 @@ const shotMap = {
   "reservas-1.png": new URL("../assets/reservas-1.webp", import.meta.url).href,
   "reservas-2.png": new URL("../assets/reservas-2.webp", import.meta.url).href,
   "reservas-3.png": new URL("../assets/reservas-3.webp", import.meta.url).href,
+  "vegan-roll.png": new URL("../assets/vegan-roll.webp", import.meta.url).href,
+  "vegan-roll-project.png": new URL("../assets/vegan-roll-project.webp", import.meta.url).href,
+  "vegan-roll-1.png": new URL("../assets/vegan-roll-1.webp", import.meta.url).href,
+  "vegan-roll-2.png": new URL("../assets/vegan-roll-2.webp", import.meta.url).href,
+  "vegan-roll-3.png": new URL("../assets/vegan-roll-3.webp", import.meta.url).href,
+  "vegan-roll-4.png": new URL("../assets/vegan-roll-4.webp", import.meta.url).href,
+  "locura.png": new URL("../assets/locura.webp", import.meta.url).href,
+  "locura-project.png": new URL("../assets/locura-project.webp", import.meta.url).href,
+  "locura-1.png": new URL("../assets/locura-1.webp", import.meta.url).href,
+  "locura-2.png": new URL("../assets/locura-2.webp", import.meta.url).href,
+  "locura-3.png": new URL("../assets/locura-3.webp", import.meta.url).href,
+  "locura-4.png": new URL("../assets/locura-4.webp", import.meta.url).href,
+  "platypool.png": new URL("../assets/platypool.webp", import.meta.url).href,
+  "platypool-project.png": new URL("../assets/platypool-project.webp", import.meta.url).href,
+  "platypool-1.png": new URL("../assets/platypool-1.webp", import.meta.url).href,
+  "platypool-2.png": new URL("../assets/platypool-2.webp", import.meta.url).href,
+  "platypool-3.png": new URL("../assets/platypool-3.webp", import.meta.url).href,
+  "platypool-4.png": new URL("../assets/platypool-4.webp", import.meta.url).href,
 };
 
 const cover = (file) => coverMap[file];
@@ -428,12 +488,54 @@ const projectMeta = [
     shots: ["ducati.png", { file: "ducati-2.png", tall: true }],
   },
   {
+    slug: "the-vegan-roll",
+    cover: "vegan-roll.png",
+    name: "The Vegan Roll",
+    href: "https://the-vegan-roll.vercel.app/",
+    image: "vegan-roll.png",
+    shots: [
+      "vegan-roll-project.png",
+      "vegan-roll-1.png",
+      "vegan-roll-2.png",
+      "vegan-roll-3.png",
+      "vegan-roll-4.png",
+    ],
+  },
+  {
     slug: "pecatto-burger",
     cover: "pecatto.png",
     name: "Pecatto Burger",
     href: "https://pecatto-burger-two.vercel.app/",
     image: "pecatto-1.png",
     shots: ["pecatto.png", "pecatto-1.png", "pecatto-2.png", "pecatto-3.png"],
+  },
+  {
+    slug: "locura-burger",
+    cover: "locura.png",
+    name: "Locura Burger",
+    href: "https://locura-burger.vercel.app/",
+    image: "locura.png",
+    shots: [
+      "locura-project.png",
+      "locura-1.png",
+      "locura-2.png",
+      "locura-3.png",
+      "locura-4.png",
+    ],
+  },
+  {
+    slug: "platypool",
+    cover: "platypool.png",
+    name: "Platypool",
+    href: "https://platypool-psi.vercel.app/",
+    image: "platypool.png",
+    shots: [
+      "platypool-project.png",
+      "platypool-1.png",
+      "platypool-2.png",
+      "platypool-3.png",
+      "platypool-4.png",
+    ],
   },
   {
     slug: "reservas",
@@ -462,11 +564,13 @@ const projectMeta = [
 ];
 
 const projects = computed(() =>
-  projectMeta.map((p, i) => ({
-    ...p,
-    name: t.value.projectsPage.names[p.slug] ?? p.name,
-    alt: t.value.work.projectAlts[i],
-  }))
+  projectMeta
+    .map((p, i) => ({
+      ...p,
+      name: t.value.projectsPage.names[p.slug] ?? p.name,
+      alt: t.value.work.projectAlts[i],
+    }))
+    .filter((p) => p.cover)
 );
 
 const projectPages = computed(() =>
@@ -1746,10 +1850,12 @@ const vTilt = {
                 :key="project.slug"
                 :href="project.projectPath"
                 class="pg-card pg-list-reveal"
+                :class="`is-${project.slug}`"
                 @click.prevent="openProject(project)"
               >
                 <span class="pg-shot">
                   <img
+                    v-if="project.cover"
                     :src="cover(project.cover)"
                     v-bind="coverSize(project.cover)"
                     :alt="project.alt"
@@ -1757,6 +1863,16 @@ const vTilt = {
                     :fetchpriority="index === 0 ? 'high' : 'auto'"
                     decoding="async"
                   />
+                  <span
+                    v-else
+                    class="pg-mockup-placeholder"
+                    :class="`is-${project.placeholderTheme}`"
+                    role="img"
+                    :aria-label="`${project.alt}. ${t.projectsPage.mockupsPending}`"
+                  >
+                    <span class="pg-placeholder-name">{{ project.name }}</span>
+                    <span class="pg-placeholder-status">{{ t.projectsPage.mockupsPending }}</span>
+                  </span>
                 </span>
                 <span class="pg-caption">
                   <span class="pg-name">{{ project.name }}</span>
@@ -1818,6 +1934,14 @@ const vTilt = {
                   decoding="async"
                 />
               </figure>
+              <div
+                v-if="activeProject.shots.length === 0"
+                class="pg-detail-placeholder pg-shot-reveal is-visible"
+                :class="`is-${activeProject.placeholderTheme}`"
+              >
+                <span class="pg-placeholder-name">{{ activeProject.name }}</span>
+                <span class="pg-placeholder-status">{{ t.projectsPage.mockupsPending }}</span>
+              </div>
             </div>
           </div>
         </transition>

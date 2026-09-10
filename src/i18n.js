@@ -55,11 +55,13 @@ export const messages = {
       projectAlts: [
         "Aparicio & Alemany architecture studio website screenshot",
         "Ducati W93 contest website screenshot",
+        "The Vegan Roll vegan sushi restaurant website",
         "Pecatto Burger restaurant website screenshot",
+        "Locura Burger restaurant website",
+        "Platypool pool-cleaning product website",
         "Terron Studio booking system screenshot",
         "Collecta website screenshot",
         "BurnTab website screenshot",
-        "PowerPool website screenshot",
       ],
     },
     projectsPage: {
@@ -68,6 +70,7 @@ export const messages = {
       seoDescription: "Explore websites and digital products designed and built by Terron Studio, from custom business websites to our own apps.",
       back: "Back to projects",
       visit: "Visit site",
+      mockupsPending: "Mockups coming soon",
       seo: {
         "aparicio-alemany": {
           title: "Aparicio & Alemany: architecture website | Terron Studio",
@@ -92,6 +95,18 @@ export const messages = {
         burntab: {
           title: "BurnTab: macOS app design and development | Terron Studio",
           description: "BurnTab case study, a macOS app conceived, designed and developed from start to finish by Terron Studio.",
+        },
+        "the-vegan-roll": {
+          title: "The Vegan Roll: vegan sushi restaurant website | Terron Studio",
+          description: "Custom website for The Vegan Roll, translating its Japanese technique, plant-based cuisine and bold character into an editorial digital experience.",
+        },
+        "locura-burger": {
+          title: "Locura Burger: restaurant website | Terron Studio",
+          description: "Custom website for Locura Burger, built around its bold identity, dry-aged burgers and national competition credentials.",
+        },
+        platypool: {
+          title: "Platypool: product and ecommerce website | Terron Studio",
+          description: "Product website for Platypool, explaining a patented pool-cleaning tool through a clear, persuasive and highly visual experience.",
         },
       },
       briefs: {
@@ -127,6 +142,21 @@ export const messages = {
           emphasis: "with no scrolling and every step clear at first glance,",
           end: "worthy of Ducati, We Are 93 and Marc Márquez.",
         },
+        "the-vegan-roll": {
+          start: "We started with a website built as a stopgap,",
+          emphasis: "and it was time to give the brand the care it deserved,",
+          end: "its colours, a Japanese feel and the delicacy that defines The Vegan Roll.",
+        },
+        "locura-burger": {
+          start: "We wanted a website that brought Locura's personality to the screen,",
+          emphasis: "loud, hungry and impossible to mistake for anyone else,",
+          end: "and put Villamartín firmly on Spain's burger map.",
+        },
+        platypool: {
+          start: "We needed to make an unfamiliar invention feel obvious,",
+          emphasis: "less time cleaning the pool and more time enjoying it,",
+          end: "through a product story that explains, proves and sells in one fluid journey.",
+        },
       },
       tags: {
         collecta: "Mobile App",
@@ -135,6 +165,9 @@ export const messages = {
         "ducati-w93": "Website",
         "pecatto-burger": "Restaurant website",
         reservas: "by Terron Studio",
+        "the-vegan-roll": "Restaurant website",
+        "locura-burger": "Restaurant website",
+        platypool: "Product website",
       },
       names: {
         reservas: "Booking system by Terron Studio",
@@ -313,11 +346,13 @@ export const messages = {
       projectAlts: [
         "Captura de la web del estudio de arquitectura Aparicio & Alemany",
         "Captura de la web del concurso Ducati W93",
+        "Web del restaurante de sushi vegano The Vegan Roll",
         "Captura de la web del restaurante Pecatto Burger",
+        "Web de la hamburguesería Locura Burger",
+        "Web de producto para el limpia piscinas Platypool",
         "Captura del sistema de reservas de Terron Studio",
         "Captura de la web de Collecta",
         "Captura de la web de BurnTab",
-        "Captura de la web de PowerPool",
       ],
     },
     projectsPage: {
@@ -326,6 +361,7 @@ export const messages = {
       seoDescription: "Descubre webs y productos digitales diseñados y desarrollados por Terron Studio, desde páginas web a medida hasta nuestras propias aplicaciones.",
       back: "Volver a proyectos",
       visit: "Ver web",
+      mockupsPending: "Mockups próximamente",
       seo: {
         "aparicio-alemany": {
           title: "Aparicio & Alemany: diseño web para arquitectura | Terron Studio",
@@ -350,6 +386,18 @@ export const messages = {
         burntab: {
           title: "BurnTab: diseño y desarrollo de app para macOS | Terron Studio",
           description: "Caso de estudio de BurnTab, una aplicación para macOS concebida, diseñada y desarrollada de principio a fin por Terron Studio.",
+        },
+        "the-vegan-roll": {
+          title: "The Vegan Roll: diseño web para sushi vegano | Terron Studio",
+          description: "Web a medida para The Vegan Roll, trasladando su técnica japonesa, cocina vegetal y carácter propio a una experiencia digital editorial.",
+        },
+        "locura-burger": {
+          title: "Locura Burger: diseño web para hamburguesería | Terron Studio",
+          description: "Web a medida para Locura Burger, construida alrededor de su identidad atrevida, sus burgers dry aged y su paso por el campeonato nacional.",
+        },
+        platypool: {
+          title: "Platypool: diseño web de producto y ecommerce | Terron Studio",
+          description: "Web de producto para Platypool, pensada para explicar una herramienta patentada de limpieza de piscinas de forma clara, persuasiva y muy visual.",
         },
       },
       briefs: {
@@ -385,6 +433,21 @@ export const messages = {
           emphasis: "sin scroll y con todos los pasos claros a primera vista,",
           end: "a la altura de Ducati, We Are 93 y Marc Márquez.",
         },
+        "the-vegan-roll": {
+          start: "Partíamos de una web hecha para salir del paso,",
+          emphasis: "y tocaba darle el cuidado que la marca ya pedía,",
+          end: "sus colores, un aire japonés y la delicadeza que define The Vegan Roll.",
+        },
+        "locura-burger": {
+          start: "Queríamos una web que llevase la personalidad de Locura a la pantalla,",
+          emphasis: "descarada, hambrienta e imposible de confundir,",
+          end: "y que pusiera a Villamartín en el mapa burger nacional.",
+        },
+        platypool: {
+          start: "Teníamos que hacer evidente una invención poco conocida,",
+          emphasis: "menos tiempo limpiando la piscina y más tiempo disfrutándola,",
+          end: "con una historia de producto que explica, demuestra y vende en un solo recorrido.",
+        },
       },
       tags: {
         collecta: "App móvil",
@@ -393,6 +456,9 @@ export const messages = {
         "ducati-w93": "Página web",
         "pecatto-burger": "Web para restaurante",
         reservas: "by Terron Studio",
+        "the-vegan-roll": "Web para restaurante",
+        "locura-burger": "Web para restaurante",
+        platypool: "Web de producto",
       },
       names: {
         reservas: "Sistema de reservas by Terron Studio",

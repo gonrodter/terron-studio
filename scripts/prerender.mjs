@@ -124,7 +124,8 @@ function applyRouteHead(html, route) {
   if (!imagePath) throw new Error(`No social image found for ${route}`);
   const imageUrl = new URL(`/${imagePath}`, SITE_ORIGIN).href;
   const isProject = seo.type === "CreativeWork";
-  const lcpImagePath = manifest[seo.lcpImageSource]?.file;
+  const hasProjectImage = isProject && Boolean(seo.imageSource);
+  const lcpImagePath = seo.lcpImageSource ? manifest[seo.lcpImageSource]?.file : "og.png";
   if (!lcpImagePath) throw new Error(`No LCP image found for ${route}`);
 
   html = html.replace(/<html\s+lang=["'][^"']+["']>/i, `<html lang="${seo.locale}">`);
@@ -152,9 +153,9 @@ function applyRouteHead(html, route) {
   html = replaceMeta(html, "property", "og:locale:alternate", seo.locale === "es" ? "en_US" : "es_ES");
   html = replaceMeta(html, "property", "og:image", imageUrl);
   html = replaceMeta(html, "property", "og:image:alt", seo.imageAlt);
-  html = replaceMeta(html, "property", "og:image:type", isProject ? "image/webp" : "image/png");
-  html = replaceMeta(html, "property", "og:image:width", isProject ? "1920" : "1200");
-  html = replaceMeta(html, "property", "og:image:height", isProject ? "1536" : "630");
+  html = replaceMeta(html, "property", "og:image:type", hasProjectImage ? "image/webp" : "image/png");
+  html = replaceMeta(html, "property", "og:image:width", hasProjectImage ? "1920" : "1200");
+  html = replaceMeta(html, "property", "og:image:height", hasProjectImage ? "1536" : "630");
   html = replaceMeta(html, "name", "twitter:title", seo.title);
   html = replaceMeta(html, "name", "twitter:description", seo.description);
   html = replaceMeta(html, "name", "twitter:image", imageUrl);

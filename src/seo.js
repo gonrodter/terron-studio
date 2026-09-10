@@ -12,6 +12,9 @@ const CONTENT_ROUTES = [
   "/projects/reservas",
   "/projects/collecta",
   "/projects/burntab",
+  "/projects/the-vegan-roll",
+  "/projects/locura-burger",
+  "/projects/platypool",
 ];
 
 export const PRERENDER_ROUTES = SUPPORTED_LOCALES.flatMap((locale) =>
@@ -35,24 +38,42 @@ const projectData = {
     name: "Pecatto Burger",
     imageSource: "assets/pecatto-1.webp",
     lcpImageSource: "assets/pecatto.webp",
-    imageAltIndex: 2,
+    imageAltIndex: 3,
   },
   reservas: {
     name: "Sistema de reservas by Terron Studio",
     imageSource: "assets/reservas-1.webp",
     lcpImageSource: "assets/reservas.webp",
-    imageAltIndex: 3,
+    imageAltIndex: 6,
   },
   collecta: {
     name: "Collecta",
     imageSource: "assets/collecta-1.webp",
     lcpImageSource: "assets/collecta.webp",
-    imageAltIndex: 4,
+    imageAltIndex: 7,
   },
   burntab: {
     name: "BurnTab",
     imageSource: "assets/burntab-1.webp",
     lcpImageSource: "assets/burntab.webp",
+    imageAltIndex: 8,
+  },
+  "the-vegan-roll": {
+    name: "The Vegan Roll",
+    imageSource: "assets/vegan-roll.webp",
+    lcpImageSource: "assets/vegan-roll.webp",
+    imageAltIndex: 2,
+  },
+  "locura-burger": {
+    name: "Locura Burger",
+    imageSource: "assets/locura.webp",
+    lcpImageSource: "assets/locura.webp",
+    imageAltIndex: 4,
+  },
+  platypool: {
+    name: "Platypool",
+    imageSource: "assets/platypool.webp",
+    lcpImageSource: "assets/platypool.webp",
     imageAltIndex: 5,
   },
 };
