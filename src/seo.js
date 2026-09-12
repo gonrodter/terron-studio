@@ -6,15 +6,16 @@ export const SUPPORTED_LOCALES = ["es", "en"];
 const CONTENT_ROUTES = [
   "",
   "/projects",
+  "/projects/sushi-panda",
+  "/projects/the-vegan-roll",
   "/projects/aparicio-alemany",
   "/projects/ducati-w93",
   "/projects/pecatto-burger",
+  "/projects/locura-burger",
+  "/projects/platypool",
   "/projects/reservas",
   "/projects/collecta",
   "/projects/burntab",
-  "/projects/the-vegan-roll",
-  "/projects/locura-burger",
-  "/projects/platypool",
 ];
 
 export const PRERENDER_ROUTES = SUPPORTED_LOCALES.flatMap((locale) =>
@@ -22,59 +23,65 @@ export const PRERENDER_ROUTES = SUPPORTED_LOCALES.flatMap((locale) =>
 );
 
 const projectData = {
+  "sushi-panda": {
+    name: "Sushi Panda",
+    imageSource: "assets/sushi-panda.webp",
+    lcpImageSource: "assets/sushi-panda.webp",
+    imageAltIndex: 0,
+  },
   "aparicio-alemany": {
     name: "Aparicio & Alemany",
     imageSource: "assets/aparicio-1.webp",
     lcpImageSource: "assets/aparicio.webp",
-    imageAltIndex: 0,
+    imageAltIndex: 2,
   },
   "ducati-w93": {
     name: "Ducati W93",
     imageSource: "assets/ducati-1.webp",
     lcpImageSource: "assets/ducati.webp",
-    imageAltIndex: 1,
+    imageAltIndex: 3,
   },
   "pecatto-burger": {
     name: "Pecatto Burger",
     imageSource: "assets/pecatto-1.webp",
     lcpImageSource: "assets/pecatto.webp",
-    imageAltIndex: 3,
+    imageAltIndex: 4,
   },
   reservas: {
     name: "Sistema de reservas by Terron Studio",
     imageSource: "assets/reservas-1.webp",
     lcpImageSource: "assets/reservas.webp",
-    imageAltIndex: 6,
+    imageAltIndex: 7,
   },
   collecta: {
     name: "Collecta",
     imageSource: "assets/collecta-1.webp",
     lcpImageSource: "assets/collecta.webp",
-    imageAltIndex: 7,
+    imageAltIndex: 8,
   },
   burntab: {
     name: "BurnTab",
     imageSource: "assets/burntab-1.webp",
     lcpImageSource: "assets/burntab.webp",
-    imageAltIndex: 8,
+    imageAltIndex: 9,
   },
   "the-vegan-roll": {
     name: "The Vegan Roll",
     imageSource: "assets/vegan-roll.webp",
     lcpImageSource: "assets/vegan-roll.webp",
-    imageAltIndex: 2,
+    imageAltIndex: 1,
   },
   "locura-burger": {
     name: "Locura Burger",
     imageSource: "assets/locura.webp",
     lcpImageSource: "assets/locura.webp",
-    imageAltIndex: 4,
+    imageAltIndex: 5,
   },
   platypool: {
     name: "Platypool",
     imageSource: "assets/platypool.webp",
     lcpImageSource: "assets/platypool.webp",
-    imageAltIndex: 5,
+    imageAltIndex: 6,
   },
 };
 

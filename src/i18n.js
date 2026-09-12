@@ -53,9 +53,10 @@ export const messages = {
       heading: "Our Work",
       leadHtml: 'Different products. Different audiences. Different energy.<br />Always the <span class="mark green">same level of care.</span>',
       projectAlts: [
+        "Sushi Panda restaurant website",
+        "The Vegan Roll vegan sushi restaurant website",
         "Aparicio & Alemany architecture studio website screenshot",
         "Ducati W93 contest website screenshot",
-        "The Vegan Roll vegan sushi restaurant website",
         "Pecatto Burger restaurant website screenshot",
         "Locura Burger restaurant website",
         "Platypool pool-cleaning product website",
@@ -72,6 +73,10 @@ export const messages = {
       visit: "Visit site",
       mockupsPending: "Mockups coming soon",
       seo: {
+        "sushi-panda": {
+          title: "Sushi Panda: restaurant group website | Terron Studio",
+          description: "Custom website for Sushi Panda, bringing its menu, locations, weekly promotions and catering offer into one bold and recognisable digital experience.",
+        },
         "aparicio-alemany": {
           title: "Aparicio & Alemany: architecture website | Terron Studio",
           description: "Custom website design and development for Aparicio & Alemany, created as a clean, distinctive showcase for the architecture studio and its projects.",
@@ -110,6 +115,11 @@ export const messages = {
         },
       },
       briefs: {
+        "sushi-panda": {
+          start: "With all the work we were doing on social media and the number of people already following us,",
+          emphasis: "we needed a website that lived up to the brand,",
+          end: "and turned that attention into orders, bookings and visits to our restaurants.",
+        },
         collecta: {
           start: "A project of",
           emphasis: "our own making,",
@@ -159,6 +169,7 @@ export const messages = {
         },
       },
       tags: {
+        "sushi-panda": "Restaurant website",
         collecta: "Mobile App",
         burntab: "macOS App",
         "aparicio-alemany": "Website",
@@ -344,9 +355,10 @@ export const messages = {
       heading: "Nuestro trabajo",
       leadHtml: 'Distintos productos. Distintos públicos. Distinta energía.<br />Siempre el <span class="mark green">mismo mimo.</span>',
       projectAlts: [
+        "Web de la cadena de restaurantes Sushi Panda",
+        "Web del restaurante de sushi vegano The Vegan Roll",
         "Captura de la web del estudio de arquitectura Aparicio & Alemany",
         "Captura de la web del concurso Ducati W93",
-        "Web del restaurante de sushi vegano The Vegan Roll",
         "Captura de la web del restaurante Pecatto Burger",
         "Web de la hamburguesería Locura Burger",
         "Web de producto para el limpia piscinas Platypool",
@@ -363,6 +375,10 @@ export const messages = {
       visit: "Ver web",
       mockupsPending: "Mockups próximamente",
       seo: {
+        "sushi-panda": {
+          title: "Sushi Panda: diseño web para cadena de restaurantes | Terron Studio",
+          description: "Web a medida para Sushi Panda, reuniendo su carta, sus locales, sus promociones semanales y su propuesta de catering en una experiencia digital atrevida y reconocible.",
+        },
         "aparicio-alemany": {
           title: "Aparicio & Alemany: diseño web para arquitectura | Terron Studio",
           description: "Diseño y desarrollo de una web a medida para Aparicio & Alemany, creada como un escaparate limpio y diferente para el estudio y sus proyectos de arquitectura.",
@@ -401,6 +417,11 @@ export const messages = {
         },
       },
       briefs: {
+        "sushi-panda": {
+          start: "Con todo el trabajo que hacíamos en redes y la cantidad de gente que ya nos seguía,",
+          emphasis: "necesitábamos una web a la altura de la marca,",
+          end: "que convirtiese esa atención en pedidos, reservas y visitas a nuestros restaurantes.",
+        },
         collecta: {
           start: "Un proyecto de",
           emphasis: "nuestra propia cosecha,",
@@ -450,6 +471,7 @@ export const messages = {
         },
       },
       tags: {
+        "sushi-panda": "Web para restaurante",
         collecta: "App móvil",
         burntab: "App de macOS",
         "aparicio-alemany": "Página web",
