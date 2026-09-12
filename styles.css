@@ -6891,6 +6891,7 @@ body.modal-open {
 .pg-caption {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: 10px;
   padding: 16px 6px 0;
 }
@@ -6898,6 +6899,13 @@ body.modal-open {
 .pg-name {
   font-size: 17px;
   font-weight: 760;
+}
+
+.pg-category {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 520;
+  text-align: right;
 }
 
 /* The list title starts the sequence; cards reveal individually on scroll. */

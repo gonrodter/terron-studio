@@ -623,6 +623,7 @@ const projectPages = computed(() =>
     projectPath: `/${lang.value}/projects/${p.slug}`,
     alt: t.value.work.projectAlts[i],
     tag: t.value.projectsPage.tags[p.slug],
+    category: t.value.projectsPage.listCategories[p.slug],
     brief: t.value.projectsPage.briefs[p.slug],
     seo: t.value.projectsPage.seo[p.slug],
     shots: p.shots.map((shot, si) => {
@@ -1918,6 +1919,7 @@ const vTilt = {
                 </span>
                 <span class="pg-caption">
                   <span class="pg-name">{{ project.name }}</span>
+                  <span class="pg-category">{{ project.category }}</span>
                 </span>
               </a>
             </div>
